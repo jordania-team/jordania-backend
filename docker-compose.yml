@@ -1,7 +1,6 @@
 services:
   postgres:
     image: postgres:18
-    container_name: poc-postgres
     environment:
       POSTGRES_DB: pocdb
       POSTGRES_USER: pocuser
@@ -20,7 +19,6 @@ services:
   api:
     build:
       context: ./backend/pocapi
-    container_name: poc-api
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pocdb
       SPRING_DATASOURCE_USERNAME: pocuser

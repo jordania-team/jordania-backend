@@ -3,20 +3,23 @@ spring:
     name: pocapi
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/pocdb
-    username: pocuser
-    password: pocpass
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/pocdb}
+    username: ${SPRING_DATASOURCE_USERNAME:pocuser}
+    password: ${SPRING_DATASOURCE_PASSWORD:pocpass}
 
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
+    show-sql: ${SPRING_JPA_SHOW_SQL:false}
     properties:
       hibernate:
-        format_sql: true
+        format_sql: ${SPRING_JPA_FORMAT_SQL:false}
 
   flyway:
     enabled: true
+
+server:
+  port: ${SERVER_PORT:8080}
 
 management:
   endpoints:
