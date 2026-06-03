@@ -1,0 +1,66 @@
+{
+  "family": "pocapi",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::964775859627:role/pocapi-ecs-execution-role",
+  "taskRoleArn": "arn:aws:iam::964775859627:role/pocapi-ecs-task-role",
+  "runtimePlatform": {
+    "cpuArchitecture": "X86_64",
+    "operatingSystemFamily": "LINUX"
+  },
+  "containerDefinitions": [
+    {
+      "name": "pocapi",
+      "image": "964775859627.dkr.ecr.us-east-1.amazonaws.com/pocapi:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "SERVER_PORT",
+          "value": "8080"
+        },
+        {
+          "name": "SPRING_JPA_SHOW_SQL",
+          "value": "false"
+        },
+        {
+          "name": "SPRING_JPA_FORMAT_SQL",
+          "value": "false"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "SPRING_DATASOURCE_URL",
+          "valueFrom": "arn:aws:ssm:us-east-1:964775859627:parameter/pocapi/prod/db/url"
+        },
+        {
+          "name": "SPRING_DATASOURCE_USERNAME",
+          "valueFrom": "arn:aws:ssm:us-east-1:964775859627:parameter/pocapi/prod/db/username"
+        },
+        {
+          "name": "SPRING_DATASOURCE_PASSWORD",
+          "valueFrom": "arn:aws:ssm:us-east-1:964775859627:parameter/pocapi/prod/db/password"
+        },
+        {
+          "name": "POCAPI_IMAGES_BUCKET",
+          "valueFrom": "arn:aws:ssm:us-east-1:964775859627:parameter/pocapi/prod/s3/images-bucket"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/pocapi",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}
