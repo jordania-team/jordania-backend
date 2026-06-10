@@ -3,7 +3,6 @@ package com.rodrigoborges.pocapi;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
 public class PocapiApplication {
 
 	public static void main(String[] args) {
