@@ -15,11 +15,11 @@
     },
     {
       "rulePriority": 2,
-      "description": "Keep only the latest 2 tagged images",
+      "description": "Keep only the latest tagged image",
       "selection": {
         "tagStatus": "any",
         "countType": "imageCountMoreThan",
-        "countNumber": 2
+        "countNumber": 1
       },
       "action": {
         "type": "expire"

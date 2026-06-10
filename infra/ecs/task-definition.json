@@ -13,7 +13,7 @@
   "containerDefinitions": [
     {
       "name": "pocapi",
-      "image": "964775859627.dkr.ecr.us-east-1.amazonaws.com/pocapi:latest",
+      "image": "964775859627.dkr.ecr.us-east-1.amazonaws.com/pocapi:auth-v2-20260610-092440",
       "essential": true,
       "portMappings": [
         {
@@ -51,6 +51,14 @@
         {
           "name": "POCAPI_IMAGES_BUCKET",
           "valueFrom": "arn:aws:ssm:us-east-1:964775859627:parameter/pocapi/prod/s3/images-bucket"
+        },
+        {
+          "name": "AUTH_JWT_SECRET",
+          "valueFrom": "arn:aws:ssm:us-east-1:964775859627:parameter/pocapi/prod/auth/jwt-secret"
+        },
+        {
+          "name": "AUTH_APPLE_CLIENT_ID",
+          "valueFrom": "arn:aws:ssm:us-east-1:964775859627:parameter/pocapi/prod/auth/apple-client-id"
         }
       ],
       "logConfiguration": {

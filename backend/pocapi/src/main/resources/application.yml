@@ -26,3 +26,11 @@ management:
     web:
       exposure:
         include: health,info
+
+app:
+  auth:
+    issuer: ${AUTH_JWT_ISSUER:pocapi}
+    jwt-secret: ${AUTH_JWT_SECRET}
+    token-ttl: ${AUTH_JWT_TTL:PT1H}
+    apple-client-id: ${AUTH_APPLE_CLIENT_ID:}
+    google-client-id: ${AUTH_GOOGLE_CLIENT_ID:}
