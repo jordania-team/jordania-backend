@@ -3,9 +3,9 @@ spring:
     name: pocapi
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/pocdb}
-    username: ${SPRING_DATASOURCE_USERNAME:pocuser}
-    password: ${SPRING_DATASOURCE_PASSWORD:pocpass}
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
 
   jpa:
     hibernate:
@@ -26,3 +26,7 @@ management:
     web:
       exposure:
         include: health,info
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
