@@ -1,4 +1,4 @@
-package com.rodrigoborges.pocapi.auth;
+package com.jordania.api.Auth;
 
 public class AuthConfigurationException extends RuntimeException {
 

@@ -1,4 +1,4 @@
-package com.rodrigoborges.pocapi.auth;
+package com.jordania.api.Auth;
 
 public record SocialIdentity(
         AuthProvider provider,

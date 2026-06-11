@@ -1,4 +1,4 @@
-package com.rodrigoborges.pocapi.auth;
+package com.jordania.api.Auth;
 
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;

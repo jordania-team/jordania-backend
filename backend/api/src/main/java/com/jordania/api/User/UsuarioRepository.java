@@ -1,5 +1,6 @@
-package com.rodrigoborges.pocapi.auth;
+package com.jordania.api.User;
 
+import com.jordania.api.Auth.AuthProvider;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

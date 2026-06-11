@@ -1,6 +1,6 @@
-package com.rodrigoborges.pocapi.tarefa;
+package com.jordania.api.Tarefa;
 
-import com.rodrigoborges.pocapi.auth.Usuario;
+import com.jordania.api.User.Usuario;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;

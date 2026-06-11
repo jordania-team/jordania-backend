@@ -1,4 +1,4 @@
-package com.rodrigoborges.pocapi.tarefa;
+package com.jordania.api.Tarefa;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

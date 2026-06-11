@@ -1,4 +1,4 @@
-package com.rodrigoborges.pocapi.auth;
+package com.jordania.api.Auth;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;

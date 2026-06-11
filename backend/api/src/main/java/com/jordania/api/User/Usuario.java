@@ -1,5 +1,6 @@
-package com.rodrigoborges.pocapi.auth;
+package com.jordania.api.User;
 
+import com.jordania.api.Auth.AuthProvider;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

@@ -1,5 +1,6 @@
-package com.rodrigoborges.pocapi.tarefa;
+package com.jordania.api.Tarefa.TarefaDTO;
 
+import com.jordania.api.Tarefa.Tarefa;
 import java.time.LocalDateTime;
 
 public record TarefaResponse(

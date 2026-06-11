@@ -1,5 +1,7 @@
-package com.rodrigoborges.pocapi.auth;
+package com.jordania.api.Auth;
 
+import com.jordania.api.User.Usuario;
+import com.jordania.api.User.UsuarioRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

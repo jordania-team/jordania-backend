@@ -1,4 +1,4 @@
-package com.rodrigoborges.pocapi.tarefa;
+package com.jordania.api.Tarefa.TarefaDTO;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

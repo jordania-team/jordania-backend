@@ -1,4 +1,4 @@
-package com.rodrigoborges.pocapi.auth;
+package com.jordania.api.Auth;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

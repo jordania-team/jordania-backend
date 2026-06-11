@@ -1,5 +1,6 @@
-package com.rodrigoborges.pocapi.auth;
+package com.jordania.api.Auth;
 
+import com.jordania.api.User.Usuario;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;

@@ -18,7 +18,8 @@ services:
 
   api:
     build:
-      context: ./backend/pocapi
+      context: ./backend
+      dockerfile: api/Dockerfile
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pocdb
       SPRING_DATASOURCE_USERNAME: pocuser

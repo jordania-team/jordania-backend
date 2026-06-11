@@ -1,7 +1,9 @@
-package com.rodrigoborges.pocapi.tarefa;
+package com.jordania.api.Tarefa;
 
-import com.rodrigoborges.pocapi.auth.Usuario;
-import com.rodrigoborges.pocapi.auth.UsuarioRepository;
+import com.jordania.api.Tarefa.TarefaDTO.CriarTarefaRequest;
+import com.jordania.api.Tarefa.TarefaDTO.TarefaResponse;
+import com.jordania.api.User.Usuario;
+import com.jordania.api.User.UsuarioRepository;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
