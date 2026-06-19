@@ -33,7 +33,8 @@ public class SecurityConfig {
                         .requestMatchers("/auth/login", "/actuator/health", "/actuator/info").permitAll()
                         .requestMatchers("/dev/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/users/me").authenticated()
+                        .anyRequest().denyAll()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .build();

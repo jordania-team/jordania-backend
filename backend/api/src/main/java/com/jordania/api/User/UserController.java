@@ -24,7 +24,7 @@ public class UserController {
 
     /// retorna o perfil do usuario autenticado
     /// O ID é extraido diretamente do JWT — não há parametro de rota
-    /// Requer: Authorization: Bearer <token>
+    /// requer: Authorization: Bearer <token>
     @GetMapping("/me")
     public UserResponse me(@AuthenticationPrincipal Jwt jwt) {
         UUID userId = UUID.fromString(jwt.getSubject());
