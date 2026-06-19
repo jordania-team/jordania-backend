@@ -22,8 +22,8 @@ public class UserController {
         this.userService = userService;
     }
 
-    /// Retorna o perfil do usuário autenticado.
-    /// O ID é extraído diretamente do JWT — não há parâmetro de rota.
+    /// retorna o perfil do usuario autenticado
+    /// O ID é extraido diretamente do JWT — não há parametro de rota
     /// Requer: Authorization: Bearer <token>
     @GetMapping("/me")
     public UserResponse me(@AuthenticationPrincipal Jwt jwt) {

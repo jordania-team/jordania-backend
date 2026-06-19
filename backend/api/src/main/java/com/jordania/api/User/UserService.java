@@ -13,9 +13,9 @@ public class UserService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    /// Busca o usuário pelo ID extraído do JWT.
-    /// Lança IllegalArgumentException se o usuário não for encontrado —
-    /// o controller mapeia isso para 404.
+    /// busca o usuario pelo ID extraido do JWT
+    /// lanca IllegalArgumentException se o usuario nao for encontrado —
+    /// o controller mapeia isso para 404
     public UserResponse getById(UUID id) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado: " + id));

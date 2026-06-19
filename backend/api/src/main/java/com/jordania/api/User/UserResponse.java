@@ -4,8 +4,8 @@ import com.jordania.api.Auth.AuthProvider;
 
 import java.util.UUID;
 
-/// DTO de resposta para GET /users/me.
-/// Expõe apenas os campos necessários para o cliente validar e atualizar a sessão local.
+/// DTO de resposta para GET /users/me
+/// expoe apenas os campos necessarios para o cliente validar e atualizar a sessao local
 public record UserResponse(
         UUID id,
         String name,
