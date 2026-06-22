@@ -1,5 +1,6 @@
 package com.jordania.api.Tutor;
 
+import java.sql.Date;
 import java.util.UUID;
 
 import jakarta.persistence.Entity;
@@ -27,5 +28,8 @@ public class Tutor {
     private String username;
     private Boolean is_private;
     private String img_url;
+    private Date birthday;
+    private int reports_counter;
+    private Date updated_at;
 
 }
