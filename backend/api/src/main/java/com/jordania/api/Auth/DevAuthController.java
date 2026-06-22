@@ -9,6 +9,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
+/// endpoint exclusivo para ambiente local (profile "local")
+/// permite emitir um JWT valido sem depender de Apple/Google — sendo usado para testar endpoints protegidos
+/// NUNCA sobe para producao — @Profile("local") garante que este controller nao é registrado na AWS.
 @RestController
 @RequestMapping("/dev")
 @Profile("local")
@@ -25,7 +28,7 @@ public class DevAuthController {
     @PostMapping("/login")
     public LoginResponse devLogin(@RequestParam UUID userId) {
         Usuario usuario = usuarioRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
         return new LoginResponse(
                 tokenService.issue(usuario),
                 usuario.getId(),
