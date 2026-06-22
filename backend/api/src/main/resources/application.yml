@@ -3,34 +3,23 @@ spring:
     name: pocapi
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/pocdb}
-    username: ${SPRING_DATASOURCE_USERNAME:pocuser}
-    password: ${SPRING_DATASOURCE_PASSWORD:pocpass}
+    url: jdbc:postgresql://localhost:5432/pocdb
+    username: pocuser
+    password: pocpass
 
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: ${SPRING_JPA_SHOW_SQL:false}
+    show-sql: true
     properties:
       hibernate:
-        format_sql: ${SPRING_JPA_FORMAT_SQL:false}
+        format_sql: true
 
   flyway:
     enabled: true
-
-server:
-  port: ${SERVER_PORT:8080}
 
 management:
   endpoints:
     web:
       exposure:
         include: health,info
-
-app:
-  auth:
-    issuer: ${AUTH_JWT_ISSUER:pocapi}
-    jwt-secret: ${AUTH_JWT_SECRET}
-    token-ttl: ${AUTH_JWT_TTL:PT1H}
-    apple-client-id: ${AUTH_APPLE_CLIENT_ID:}
-    google-client-id: ${AUTH_GOOGLE_CLIENT_ID:}

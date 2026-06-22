@@ -14,7 +14,7 @@ ALTER TABLE tarefas
 
 ALTER TABLE tarefas
     ADD CONSTRAINT fk_tarefas_usuario
-        FOREIGN KEY (usuario_id) REFERENCES usuarios(id);
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id); 
 
 CREATE INDEX idx_tarefas_usuario_id
     ON tarefas(usuario_id);
