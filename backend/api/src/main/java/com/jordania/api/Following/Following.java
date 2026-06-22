@@ -44,6 +44,6 @@ public class Following {
     private Tutor follower_id;
 
     @OneToOne
-    @JoinColumn(name = "follower_id")
+    @JoinColumn(name = "follows_id")
     private Tutor follows_id;
 }
