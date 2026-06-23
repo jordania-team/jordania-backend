@@ -3,33 +3,102 @@ package com.jordania.api.Tutor;
 import java.sql.Date;
 import java.util.UUID;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-@Entity
-@Table(name = "Tutors")
-@Setter
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 public class Tutor {
-    @Id
-    @GeneratedValue
     private UUID id;
-    
     private UUID user_id;
     private String name;
     private String username;
     private Boolean is_private;
     private String img_url;
     private Date birthday;
-    private int reports_counter;
+    private Integer reports_counter;
+    private Date created_at;
     private Date updated_at;
 
+    public Tutor() {
+    }
+
+    public Tutor(UUID id, UUID user_id, String name, String username, 
+        Boolean is_private, String img_url, Date birthday, Integer reports_counter, 
+        Date created_at, Date updated_at) {
+            this.id = id;
+            this.user_id = user_id;
+            this.username = username;
+            this.is_private = is_private;
+            this.img_url = img_url;
+            this.birthday = birthday;
+            this.reports_counter = reports_counter;
+            this.created_at = created_at;
+            this.updated_at = updated_at;
+    }
+
+    public UUID getId() {
+        return this.id;
+    }
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public UUID getUserId() {
+        return this.user_id;
+    }
+    public void setUserId(UUID user_id) {
+        this.user_id = user_id;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getUsername() {
+        return this.username;
+    }
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public Boolean getIsPrivate() {
+        return this.is_private;
+    }
+    public void setIsPrivate(Boolean is_private) {
+        this.is_private = is_private;
+    }
+
+    public String getImg() {
+        return this.img_url;
+    }
+    public void setImg(String img_url) {
+        this.img_url = img_url;
+    }
+
+    public Date getBirthday() {
+        return this.birthday;
+    }
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
+    }
+
+    public Integer getReportsCounter() {
+        return this.reports_counter;
+    }
+    public void setReportsCounter(Integer reports_counter) {
+        this.reports_counter = reports_counter;
+    }
+
+    public Date getCreatedAt() {
+        return this.created_at;
+    }
+    public void setCreatedAt(Date created_at) {
+        this.created_at = created_at;
+    }
+
+    public Date getUpdatedAt() {
+        return this.updated_at;
+    }
+    public void setUpdatedAt(Date updated_at) {
+        this.updated_at = updated_at;
+    }
 }

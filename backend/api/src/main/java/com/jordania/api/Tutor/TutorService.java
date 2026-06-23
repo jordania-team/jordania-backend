@@ -7,6 +7,9 @@ import com.jordania.api.Tutor.TutorDTO.TutorRequestDTO;
 @Service
 public class TutorService {
     public Tutor createTutor(TutorRequestDTO data){
+        /*  Creates a new instance of a Tutor
+        Gets data from DTO, and sets it to a new tutor instance
+        */
         Tutor newTutor = new Tutor();
         newTutor.setName(data.name());
         newTutor.setUsername(data.username());
@@ -18,4 +21,5 @@ public class TutorService {
         
         return newTutor;
     }
+
 }
