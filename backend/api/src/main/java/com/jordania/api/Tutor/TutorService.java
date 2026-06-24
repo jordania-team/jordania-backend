@@ -13,11 +13,11 @@ public class TutorService {
         Tutor newTutor = new Tutor();
         newTutor.setName(data.name());
         newTutor.setUsername(data.username());
-        newTutor.setIs_private(data.is_private());
-        newTutor.setBirthday(data.birthday());
-        newTutor.setUpdated_at(data.updated_at());
-        newTutor.setReports_counter(data.reports_counter());
-        newTutor.setImg_url(data.img_url());
+        // newTutor.setIs_private(data.is_private());
+        // newTutor.setBirthday(data.birthday());
+        // newTutor.setUpdated_at(data.updated_at());
+        // newTutor.setReports_counter(data.reports_counter());
+        // newTutor.setImg_url(data.img_url());
         
         return newTutor;
     }
