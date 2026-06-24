@@ -79,41 +79,50 @@ public class TutorRepository {
         }
     }
 
-    // TODO: encontrar por id
-    // public void searchByIdQuery(Tutor tutor){
-    //     /* 
-    //     Connects to the database and executes insertion query
-    //     Input: tutor object
-    //     */
+    public void searchByIdQuery(Tutor tutor){
+        /* 
+        Connects to the database and executes search by id query
+        Input: tutor object
+        */
 
-    //     String sqlQuery = """
-    //         INSERT INTO Tutors (id, user_id, name, username, is_private, img_url, birthday, updated_at, reports_counter)
-    //         VALUES (:id, :user_id, :name, :username, :is_private, :img_url, :birthday, :updated_at, :reports_counter)
-    //     """;
+        String sqlQuery = "SELECT * from Tutors where id="+tutor.getId();
 
-    //     // conection with database (prepared statement is used to execute sql commands)
-    //     Connection conn;
-    //     PreparedStatement preparedStatement;
-    //     try {
-    //         conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/pocdb", "pocuser", "pocpass");
+        Connection conn;
+        PreparedStatement preparedStatement;
+        try {
+            conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/pocdb", "pocuser", "pocpass");
 
-    //         preparedStatement = conn.prepareStatement(sqlQuery);
-    //         preparedStatement.execute();
+            preparedStatement = conn.prepareStatement(sqlQuery);
+            preparedStatement.execute();
 
-    //     } catch (SQLException exception) {
-    //         System.out.println(exception);
-    //         throw new RuntimeException("Error saving tutor object to the database");
-    //     }
-    // }
+        } catch (SQLException exception) {
+            System.out.println(exception);
+            throw new RuntimeException("Error searching tutor object on the database");
+        }
+    }
 
+    public void deleteTutorByIdQuery(Tutor tutor){
+        /* 
+        Connects to the database and executes deletion by id query
+        Input: tutor object
+        */
 
-        
-    //TODO: deletar por id
+        String sqlQuery = "DELETE FROM Tutors where id="+tutor.getId();
 
+        Connection conn;
+        PreparedStatement preparedStatement;
+        try {
+            conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/pocdb", "pocuser", "pocpass");
 
-    
-    
-    
+            preparedStatement = conn.prepareStatement(sqlQuery);
+            preparedStatement.execute();
+
+        } catch (SQLException exception) {
+            System.out.println(exception);
+            throw new RuntimeException("Error deleting tutor object on the database");
+        }
+    }
+
     // TODO: verificar se ja tem username
     
 
