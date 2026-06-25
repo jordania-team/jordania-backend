@@ -1,12 +1,11 @@
 package com.jordania.api.Tutor;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -24,6 +23,7 @@ public class TutorRepository {
         this.jdbcTemplate = jdbcTemplate;
 
     }
+
     public final RowMapper<Tutor> tutorRowMapper = (rs, rowNum) -> {
         /*
         Map each row of a ResultSet to a java object
@@ -54,73 +54,53 @@ public class TutorRepository {
     };
                 
     public void insertQuery(Tutor tutor){
-        /* 
-        Connects to the database and executes insertion query
-        Input: tutor object
-        */
-
         String sqlQuery = """
             INSERT INTO Tutors (id, user_id, name, username, is_private, img_url, birthday, updated_at, reports_counter)
             VALUES (:id, :user_id, :name, :username, :is_private, :img_url, :birthday, :updated_at, :reports_counter)
         """;
 
-        // conection with database (prepared statement is used to execute sql commands)
-        Connection conn;
-        PreparedStatement preparedStatement;
-        try {
-            conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/pocdb", "pocuser", "pocpass");
+        MapSqlParameterSource params = new MapSqlParameterSource()
+            .addValue("id", tutor.getId())
+            .addValue("user_id", tutor.getUserId())
+            .addValue("name", tutor.getName())
+            .addValue("username", tutor.getUsername())
+            .addValue("is_private", tutor.getIsPrivate())
+            .addValue("img_url", tutor.getImg())
+            .addValue("birthday", tutor.getBirthday())
+            .addValue("updated_at", tutor.getUpdatedAt())
+            .addValue("reports_counter", tutor.getReportsCounter());
 
-            preparedStatement = conn.prepareStatement(sqlQuery);
-            preparedStatement.execute();
-
-        } catch (SQLException exception) {
-            System.out.println(exception);
-            throw new RuntimeException("Error saving tutor object to the database");
-        }
+        jdbcTemplate.update(sqlQuery, params);
     }
 
-    public void searchByIdQuery(Tutor tutor){
+    public Optional<Tutor> searchByIdQuery(UUID id){
         /* 
         Connects to the database and executes search by id query
         Input: tutor object
         */
 
-        String sqlQuery = "SELECT * from Tutors where id="+tutor.getId();
+        String sqlQuery = "SELECT * FROM Tutors where id= :id";
 
-        Connection conn;
-        PreparedStatement preparedStatement;
-        try {
-            conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/pocdb", "pocuser", "pocpass");
+        MapSqlParameterSource params = new MapSqlParameterSource()
+            .addValue("id", id);
 
-            preparedStatement = conn.prepareStatement(sqlQuery);
-            preparedStatement.execute();
-
-        } catch (SQLException exception) {
-            System.out.println(exception);
-            throw new RuntimeException("Error searching tutor object on the database");
-        }
+        List<Tutor> result = jdbcTemplate.query(sqlQuery, params, tutorRowMapper);
+        
+        return result.stream().findFirst();
     }
 
-    public void deleteTutorByIdQuery(Tutor tutor){
+    public void deleteTutorByIdQuery(UUID id){
         /* 
         Connects to the database and executes deletion by id query
         Input: tutor object
         */
 
-        String sqlQuery = "DELETE FROM Tutors where id="+tutor.getId();
+        String sqlQuery = "DELETE FROM Tutors where id= :id";
 
-        Connection conn;
-        PreparedStatement preparedStatement;
-        try {
-            conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/pocdb", "pocuser", "pocpass");
+        MapSqlParameterSource params = new MapSqlParameterSource()
+            .addValue("id", id);
 
-            preparedStatement = conn.prepareStatement(sqlQuery);
-            preparedStatement.execute();
-
-        } catch (SQLException exception) {
-            System.out.println(exception);
-            throw new RuntimeException("Error deleting tutor object on the database");
-        }
+        jdbcTemplate.update(sqlQuery, params);
     }
 
     // TODO: verificar se ja tem username
