@@ -44,12 +44,12 @@ public class TutorServiceUnitTest {
         when(tutorRepository.searchByIdQuery(any(UUID.class)))
             .thenAnswer(invocation -> {
                 UUID id = invocation.getArgument(0);
-                Tutor t = new Tutor();
-                t.setId(id);
-                t.setName("Jordânia Dev");
-                t.setUsername("jordania_dto_test");
-                t.setIsPrivate(false);
-                return Optional.of(t);
+                Tutor tutor = new Tutor();
+                tutor.setId(id);
+                tutor.setName("Jordânia Dev");
+                tutor.setUsername("jordania_dto_test");
+                tutor.setIsPrivate(false);
+                return Optional.of(tutor);
             });
 
         Tutor savedTutor = tutorService.createTutor(requestDto);
