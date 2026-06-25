@@ -3,8 +3,12 @@ package com.jordania.api.Pet;
 import java.util.Date;
 import java.util.UUID;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -28,14 +32,22 @@ enum Species { // TODO: arrumar
 @NoArgsConstructor
 public class Pet {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     private String username;
     private String name;
     private Date birthday;
+
+    @Enumerated(EnumType.STRING)
     private Species species;
+
+    @Column(name = "img_url")
     private String img_url;
+
+    @Column(name = "created_at")
     private Date created_at;
+
+    @Column(name = "updated_at")
     private Date updated_at; 
 }

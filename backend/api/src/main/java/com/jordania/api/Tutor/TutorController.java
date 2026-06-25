@@ -20,7 +20,7 @@ public class TutorController {
 
     // @DeleteMapping("/employees/{id}")
     // void deleteTutor(@PathVariable UUID id) {
-    //     repository.deleteById(id);
+    //     repository.deleteTutorByIdQuery(id);
     // }
 
     // @GetMapping

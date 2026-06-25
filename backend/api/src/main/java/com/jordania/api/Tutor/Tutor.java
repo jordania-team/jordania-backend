@@ -38,6 +38,7 @@ public class Tutor {
     public UUID getId() {
         return this.id;
     }
+
     public void setId(UUID id) {
         this.id = id;
     }
@@ -45,6 +46,7 @@ public class Tutor {
     public UUID getUserId() {
         return this.user_id;
     }
+
     public void setUserId(UUID user_id) {
         this.user_id = user_id;
     }
@@ -52,6 +54,7 @@ public class Tutor {
     public String getName() {
         return this.name;
     }
+    
     public void setName(String name) {
         this.name = name;
     }
