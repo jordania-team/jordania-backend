@@ -17,7 +17,7 @@ public class TutorService {
     }
 
 
-    public Tutor createTutor(TutorRequestDTO data){
+    public Tutor createTutor(TutorRequestDTO data) {
         /*  Creates a new instance of a Tutor
         Gets data from DTO, and sets it to a new tutor instance
         */
@@ -46,7 +46,7 @@ public class TutorService {
 
     public Tutor findTutorById(UUID id) {
         return repository.searchByIdQuery(id)
-                    .orElseThrow(() -> new RuntimeException("Tutor not found with ID:" + id));
+                .orElseThrow(() -> new RuntimeException("Tutor not found with ID:" + id));
     }
 
 }

@@ -4,6 +4,7 @@ import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+
 public class Tutor {
     private UUID id;
     private UUID user_id;
@@ -24,6 +25,7 @@ public class Tutor {
         LocalDateTime created_at, LocalDateTime updated_at) {
             this.id = id;
             this.user_id = user_id;
+            this.name = name;
             this.username = username;
             this.is_private = is_private;
             this.img_url = img_url;
