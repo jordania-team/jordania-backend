@@ -1,6 +1,7 @@
 package com.jordania.api.Tutor;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class Tutor {
@@ -12,15 +13,15 @@ public class Tutor {
     private String img_url;
     private Date birthday;
     private Integer reports_counter;
-    private Date created_at;
-    private Date updated_at;
+    private LocalDateTime created_at;
+    private LocalDateTime updated_at;
 
     public Tutor() {
     }
 
     public Tutor(UUID id, UUID user_id, String name, String username, 
         Boolean is_private, String img_url, Date birthday, Integer reports_counter, 
-        Date created_at, Date updated_at) {
+        LocalDateTime created_at, LocalDateTime updated_at) {
             this.id = id;
             this.user_id = user_id;
             this.username = username;
@@ -88,17 +89,17 @@ public class Tutor {
         this.reports_counter = reports_counter;
     }
 
-    public Date getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return this.created_at;
     }
-    public void setCreatedAt(Date created_at) {
+    public void setCreatedAt(LocalDateTime created_at) {
         this.created_at = created_at;
     }
 
-    public Date getUpdatedAt() {
+    public LocalDateTime getUpdatedAt() {
         return this.updated_at;
     }
-    public void setUpdatedAt(Date updated_at) {
+    public void setUpdatedAt(LocalDateTime updated_at) {
         this.updated_at = updated_at;
     }
 }

@@ -1,25 +1,52 @@
 package com.jordania.api.Tutor;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 
 import com.jordania.api.Tutor.TutorDTO.TutorRequestDTO;
 
 @Service
 public class TutorService {
+
+    private final TutorRepository repository;
+
+    public TutorService(TutorRepository repository) {
+        this.repository = repository;
+    }
+
+
     public Tutor createTutor(TutorRequestDTO data){
         /*  Creates a new instance of a Tutor
         Gets data from DTO, and sets it to a new tutor instance
         */
-        Tutor newTutor = new Tutor();
-        newTutor.setName(data.name());
-        newTutor.setUsername(data.username());
-        // newTutor.setIs_private(data.is_private());
-        // newTutor.setBirthday(data.birthday());
-        // newTutor.setUpdated_at(data.updated_at());
-        // newTutor.setReports_counter(data.reports_counter());
-        // newTutor.setImg_url(data.img_url());
+
+        // TODO: verify if user exists (check by username with repository)
+
+        // tutor instance in memory
+        Tutor tutor = new Tutor();
+        tutor.setName(data.name());
+        tutor.setUsername(data.username());
+        tutor.setIsPrivate(data.is_private());
+        tutor.setBirthday(data.birthday());
+        tutor.setImg(data.img_url());
+
         
-        return newTutor;
+        // protected data not on dto
+        tutor.setId(UUID.randomUUID());
+        tutor.setUpdatedAt(LocalDateTime.now());
+        tutor.setCreatedAt(LocalDateTime.now());
+        tutor.setReportsCounter(0);
+
+        // inserts in the database
+        repository.insertQuery(tutor);
+        return tutor;
+    }
+
+    public Tutor findTutorById(UUID id) {
+        return repository.searchByIdQuery(id)
+                    .orElseThrow(() -> new RuntimeException("Tutor not found with ID:" + id));
     }
 
 }
