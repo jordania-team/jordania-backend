@@ -1,4 +1,4 @@
-package com.rodrigoborges.api;
+package com.rodrigoborges.api.Tutor;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -34,7 +34,7 @@ public class TutorServiceUnitTest {
     }
 
     @Test
-    public void deveSalvarEBuscarPorIdComSucesso() {
+    public void mustSaveAndSearchTutor() {
         TutorRequestDTO requestDto = new TutorRequestDTO(
             "Jordânia Dev", "jordania_dto_test", false, null, null
         );
