@@ -1,5 +1,6 @@
 package com.jordania.api.Pet;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 
@@ -46,8 +47,8 @@ public class Pet {
     private String img_url;
 
     @Column(name = "created_at")
-    private Date created_at;
+    private LocalDateTime created_at;
 
     @Column(name = "updated_at")
-    private Date updated_at; 
+    private LocalDateTime updated_at; 
 }

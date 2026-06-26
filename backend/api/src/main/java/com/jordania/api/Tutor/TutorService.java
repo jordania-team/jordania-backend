@@ -46,7 +46,7 @@ public class TutorService {
 
     public Tutor findTutorById(UUID id) {
         return repository.searchByIdQuery(id)
-                .orElseThrow(() -> new RuntimeException("Tutor not found with ID:" + id));
+                    .orElseThrow(() -> new RuntimeException("Tutor not found with ID:" + id));
     }
 
 }
