@@ -5,9 +5,10 @@ CREATE TABLE Tutors (
     user_id UUID,
     name VARCHAR(300) NOT NULL,
     username VARCHAR(300) NOT NULL,
-    private BOOLEAN DEFAULT FALSE,
+    is_private BOOLEAN DEFAULT FALSE,
     img_url VARCHAR(300) NOT NULL,
     birthday TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     reports_counter INT DEFAULT 0
     -- ,

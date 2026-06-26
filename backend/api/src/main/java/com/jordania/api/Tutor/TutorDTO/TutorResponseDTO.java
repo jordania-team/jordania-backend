@@ -1,7 +1,7 @@
 package com.jordania.api.Tutor.TutorDTO;
 
-import java.sql.Date;
+import java.time.LocalDateTime;
 
-public record TutorResponseDTO(String name, String username, Boolean is_private, String img_url, Date birthday) {
+public record TutorResponseDTO(String name, String username, Boolean is_private, String img_url, LocalDateTime birthday) {
     
 }

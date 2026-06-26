@@ -1,18 +1,23 @@
 package com.jordania.api.Tutor;
 
-import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
+@Entity
+@Table(name = "Tutors")
 public class Tutor {
+    @Id
     private UUID id;
     private UUID user_id;
     private String name;
     private String username;
     private Boolean is_private;
     private String img_url;
-    private Date birthday;
+    private LocalDateTime birthday;
     private Integer reports_counter;
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
@@ -21,7 +26,7 @@ public class Tutor {
     }
 
     public Tutor(UUID id, UUID user_id, String name, String username, 
-        Boolean is_private, String img_url, Date birthday, Integer reports_counter, 
+        Boolean is_private, String img_url, LocalDateTime birthday, Integer reports_counter, 
         LocalDateTime created_at, LocalDateTime updated_at) {
             this.id = id;
             this.user_id = user_id;
@@ -80,10 +85,10 @@ public class Tutor {
         this.img_url = img_url;
     }
 
-    public Date getBirthday() {
+    public LocalDateTime getBirthday() {
         return this.birthday;
     }
-    public void setBirthday(Date birthday) {
+    public void setBirthday(LocalDateTime birthday) {
         this.birthday = birthday;
     }
 
