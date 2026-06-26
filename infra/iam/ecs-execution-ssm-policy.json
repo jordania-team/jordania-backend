@@ -12,7 +12,8 @@
         "arn:aws:ssm:us-east-1:964775859627:parameter/pocapi/prod/db/password",
         "arn:aws:ssm:us-east-1:964775859627:parameter/pocapi/prod/s3/images-bucket",
         "arn:aws:ssm:us-east-1:964775859627:parameter/pocapi/prod/auth/jwt-secret",
-        "arn:aws:ssm:us-east-1:964775859627:parameter/pocapi/prod/auth/apple-client-id"
+        "arn:aws:ssm:us-east-1:964775859627:parameter/pocapi/prod/auth/apple-client-id",
+        "arn:aws:ssm:us-east-1:964775859627:parameter/pocapi/prod/auth/google-client-id"
       ]
     }
   ]

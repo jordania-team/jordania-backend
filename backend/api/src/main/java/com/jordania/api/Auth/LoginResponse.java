@@ -6,6 +6,7 @@ public record LoginResponse(
         String token,
         UUID userId,
         String name,
-        String email
+        String email,
+        String role
 ) {
 }

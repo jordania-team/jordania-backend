@@ -1,6 +1,6 @@
 package com.jordania.api.Auth;
 
-import com.jordania.api.User.Usuario;
+import com.jordania.api.User.Users;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
@@ -29,21 +29,22 @@ public class InternalTokenService {
         this.tokenTtl = tokenTtl;
     }
 
-    public String issue(Usuario usuario) {
+    public String issue(Users user, String name) {
         Instant now = Instant.now();
 
         JwtClaimsSet.Builder claims = JwtClaimsSet.builder()
                 .issuer(issuer)
                 .issuedAt(now)
                 .expiresAt(now.plus(tokenTtl))
-                .subject(usuario.getId().toString())
-                .claim("provider", usuario.getProvider().name().toLowerCase());
+                .subject(user.getId().toString())
+                .claim("provider", user.getProvider().getProvider_name())
+                .claim("role", user.getRole().name());
 
-        if (usuario.getNome() != null) {
-            claims.claim("name", usuario.getNome());
+        if (name != null) {
+            claims.claim("name", name);
         }
-        if (usuario.getEmail() != null) {
-            claims.claim("email", usuario.getEmail());
+        if (user.getEmail() != null) {
+            claims.claim("email", user.getEmail());
         }
 
         JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).type("JWT").build();
