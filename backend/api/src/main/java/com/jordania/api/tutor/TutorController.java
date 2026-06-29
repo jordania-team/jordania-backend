@@ -1,4 +1,4 @@
-package com.jordania.api.Tutor;
+package com.jordania.api.tutor;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

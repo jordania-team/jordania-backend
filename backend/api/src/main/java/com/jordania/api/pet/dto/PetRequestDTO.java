@@ -1,4 +1,4 @@
-package com.jordania.api.Pet.PetDTO;
+package com.jordania.api.pet.dto;
 
 import java.sql.Date;
 

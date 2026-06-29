@@ -1,4 +1,4 @@
-package com.jordania.api.Tutor.TutorDTO;
+package com.jordania.api.tutor.dto;
 
 import java.time.LocalDateTime;
 

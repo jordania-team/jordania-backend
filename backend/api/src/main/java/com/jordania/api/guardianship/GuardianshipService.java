@@ -1,4 +1,4 @@
-package com.jordania.api.Guardianship;
+package com.jordania.api.guardianship;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -6,10 +6,10 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.jordania.api.Pet.Pet;
-import com.jordania.api.Pet.PetRepository;
-import com.jordania.api.Tutor.Tutor;
-import com.jordania.api.Tutor.TutorRepository;
+import com.jordania.api.pet.Pet;
+import com.jordania.api.pet.PetRepository;
+import com.jordania.api.tutor.Tutor;
+import com.jordania.api.tutor.TutorRepository;
 
 import lombok.RequiredArgsConstructor;
 

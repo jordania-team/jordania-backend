@@ -1,4 +1,4 @@
-package com.jordania.api.Tutor;
+package com.jordania.api.tutor;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -26,7 +26,7 @@ public class Tutor {
     }
 
     public Tutor(UUID id, UUID user_id, String name, String username, 
-        Boolean is_private, String img_url, LocalDateTime birthday, Integer reports_counter, 
+        Boolean is_private, String img_url, LocalDateTime birthday, Integer reports_counter,
         LocalDateTime created_at, LocalDateTime updated_at) {
             this.id = id;
             this.user_id = user_id;

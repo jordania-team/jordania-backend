@@ -1,4 +1,4 @@
-package com.jordania.api.Pet;
+package com.jordania.api.pet;
 
 import java.util.List;
 import java.util.UUID;

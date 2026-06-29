@@ -1,4 +1,4 @@
-package com.jordania.api.Pet;
+package com.jordania.api.pet;
 
 import java.time.LocalDateTime;
 import java.util.Date;

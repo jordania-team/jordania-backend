@@ -1,9 +1,9 @@
-package com.jordania.api.Following;
+package com.jordania.api.following;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import com.jordania.api.Tutor.Tutor;
+import com.jordania.api.tutor.Tutor;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

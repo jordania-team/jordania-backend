@@ -1,4 +1,4 @@
-package com.jordania.api.Guardianship;
+package com.jordania.api.guardianship;
 
 import java.util.Optional;
 import java.util.UUID;

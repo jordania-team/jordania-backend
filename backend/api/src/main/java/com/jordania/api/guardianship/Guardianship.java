@@ -1,10 +1,10 @@
-package com.jordania.api.Guardianship;
+package com.jordania.api.guardianship;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import com.jordania.api.Pet.Pet;
-import com.jordania.api.Tutor.Tutor;
+import com.jordania.api.pet.Pet;
+import com.jordania.api.tutor.Tutor;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

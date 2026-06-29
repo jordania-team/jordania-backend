@@ -1,11 +1,11 @@
-package com.jordania.api.Tutor;
+package com.jordania.api.tutor;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.jordania.api.Tutor.TutorDTO.TutorRequestDTO;
+import com.jordania.api.tutor.dto.TutorRequestDTO;
 
 @Service
 public class TutorService {

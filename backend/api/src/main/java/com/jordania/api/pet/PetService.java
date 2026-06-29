@@ -1,11 +1,11 @@
-package com.jordania.api.Pet;
+package com.jordania.api.pet;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.jordania.api.Pet.PetDTO.PetRequestDTO;
+import com.jordania.api.pet.dto.PetRequestDTO;
 
 import lombok.RequiredArgsConstructor;
 
