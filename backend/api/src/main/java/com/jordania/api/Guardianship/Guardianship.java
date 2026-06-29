@@ -32,10 +32,10 @@ public class Guardianship {
 
     @OneToOne
     @JoinColumn(name= "pet_id")
-    private Pet pet_id;
+    private Pet pet;
 
     @OneToOne
     @JoinColumn(name= "tutor_id")
-    private Tutor tutor_id;
+    private Tutor tutor;
 
 }
