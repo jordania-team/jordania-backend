@@ -1,50 +1,54 @@
 # 00 - Indice e contexto
 
-Este conjunto de documentos explica a adaptacao feita na API depois da POC inicial de tarefas. A ideia e registrar o fluxo atual de banco, autenticacao, roles e tutores para que voce consiga consultar sem depender do historico da conversa.
+Este conjunto de documentos descreve o estado atual da API depois da migracao da POC de tarefas para o modelo real de autenticacao, usuarios e tutores.
 
-## De onde a API saiu
+## Estado atual
 
-A POC original tinha dois conceitos principais:
+A API usa Spring Boot, PostgreSQL, Flyway e Spring Security Resource Server. O app faz login social com Apple ou Google, a API valida o token social e emite uma sessao propria composta por:
 
-- `tarefas`: tabela e endpoints para testar uma API simples.
-- `usuarios`: tabela criada depois para relacionar uma tarefa a um usuario autenticado.
+- access token JWT interno;
+- refresh token opaco com rotacao;
+- identificacao interna baseada em `users.id`.
 
-Esse modelo serviu para validar Spring Boot, RDS, ECS, ALB, Flyway e comunicacao com o app iOS. Depois, ele deixou de ser suficiente porque o produto passou a seguir uma modelagem propria com:
+O modelo funcional atual e:
 
-- `providers`
-- `users`
-- `admins`
-- `tutors`
+- `providers`: identidade social validada;
+- `users`: usuario interno, email, role e provider;
+- `admins`: relacao futura para usuarios administradores;
+- `tutors`: perfil de tutor do usuario;
+- `refresh_tokens`: sessoes renovaveis do usuario.
 
-A partir desse ponto, `tarefas` e `usuarios` viraram legado. Eles nao fazem mais parte do fluxo funcional atual.
+As tabelas antigas `tarefas` e `usuarios` foram mantidas apenas como historico de migracao inicial e removidas pela V4. Elas nao fazem parte do fluxo funcional atual.
 
-## O que existe agora
+## Principais endpoints
 
-A API atual esta organizada em tres pacotes principais:
+Autenticacao e sessao:
 
-- `Auth`: login social Apple/Google, validacao de token externo, emissao do JWT interno da API e validacao desse JWT.
-- `User`: entidades JPA que representam as tabelas de identidade e perfil base: `Providers`, `Users`, `Admins`, `Tutors` e `RoleType`.
-- `Tutors`: endpoints e regras de negocio para criar, atualizar e consultar o tutor do usuario autenticado.
+- `POST /auth/login`
+- `POST /auth/refresh`
+- `POST /auth/logout`
+- `GET /users/me`
 
-O banco atual e criado por migrations Flyway:
+Tutor:
 
-- `V1__create_tarefas.sql`: legado da primeira POC.
-- `V2__create_usuarios_and_link_tarefas.sql`: legado que adicionou usuarios e ligou tarefas a usuarios.
-- `V3__create_auth_users_admins_model.sql`: novo modelo base de autenticacao.
-- `V4__create_tutors_and_remove_legacy.sql`: tabela de tutors e remocao de `tarefas` e `usuarios`.
+- `GET /api/tutors/me`
+- `PUT /api/tutors/me`
 
-O arquivo `application.yml` centraliza as variaveis usadas pela API:
+Desenvolvimento local:
 
-- conexao com PostgreSQL;
-- Flyway ligado;
-- Hibernate em modo `validate`;
-- porta do servidor;
-- issuer, segredo e TTL do JWT interno;
-- client IDs de Apple e Google.
+- `POST /dev/login?userId=<uuid>` somente com `SPRING_PROFILES_ACTIVE=local`
 
-## Como ler estes documentos
+## Migrations
 
-Leia na ordem:
+As migrations Flyway atuais sao:
+
+- `V1__create_tarefas.sql`: cria a tabela inicial da POC.
+- `V2__create_usuarios_and_link_tarefas.sql`: cria `usuarios` e liga tarefas a usuarios.
+- `V3__create_auth_users_admins_model.sql`: cria `role_type`, `providers`, `users` e `admins`, migrando dados de `usuarios`.
+- `V4__create_tutors_and_remove_legacy.sql`: cria `tutors` e remove `tarefas`/`usuarios`.
+- `V5__create_refresh_tokens.sql`: cria `refresh_tokens` vinculado a `users`.
+
+## Ordem de leitura
 
 1. `01_migrations_flyway_e_banco.md`
 2. `02_modelo_de_dados_entidades_e_repositories.md`
@@ -52,26 +56,14 @@ Leia na ordem:
 4. `04_authservice_jwt_roles_e_security.md`
 5. `05_fluxo_de_tutors.md`
 6. `06_fluxos_de_requisicao_e_debug.md`
+7. `07_refresh_tokens_e_sessao.md`
 
-Essa ordem acompanha o fluxo real:
+## Regra central
 
-1. O banco nasce pelas migrations.
-2. As entidades Java mapeiam esse banco.
-3. O app faz login com Apple/Google.
-4. A API cria/atualiza `providers` e `users`.
-5. A API emite JWT interno.
-6. O app usa esse JWT para chamar `/api/tutors/me`.
-7. O tutor e criado ou atualizado no novo modelo.
+O token social Apple/Google e usado somente no login. Depois disso, o app usa o JWT interno no header:
 
-## Estado atual da autenticacao
+```http
+Authorization: Bearer <token>
+```
 
-A autenticacao e a autorizacao de `/api/**` estao centralizadas no Spring Security. O Resource Server valida o JWT interno HS256 (assinatura, `exp`, issuer e `typ`) usando o `JwtDecoder` configurado em `SecurityConfig`, e o claim `role` e convertido em authority Spring (`ROLE_TUTOR`, `ROLE_ADMIN`).
-
-Regras do filtro:
-
-- `POST /auth/login`, `OPTIONS /**` e `/actuator/health`/`/actuator/info` sao publicos;
-- `/api/tutors/**` exige `ROLE_TUTOR`;
-- qualquer outro `/api/**` exige autenticacao.
-
-Com isso, os controllers nao validam mais o token manualmente. O `TutorsController` apenas le o usuario autenticado via `Jwt.getSubject()`, entao qualquer novo endpoint `/api/**` ja nasce protegido pelo Spring Security. A classe `InternalTokenVerifier`, usada na solucao temporaria anterior, foi removida.
-
+Quando esse access token expira, o app chama `/auth/refresh` com o refresh token atual e troca por um novo par `token + refreshToken`.

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Locale;
+import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -18,19 +19,22 @@ public class AuthService {
     private final UsersRepository usersRepository;
     private final TutorsRepository tutorsRepository;
     private final InternalTokenService internalTokenService;
+    private final RefreshTokenService refreshTokenService;
 
     public AuthService(
             SocialTokenVerifier tokenVerifier,
             ProvidersRepository providersRepository,
             UsersRepository usersRepository,
             TutorsRepository tutorsRepository,
-            InternalTokenService internalTokenService
+            InternalTokenService internalTokenService,
+            RefreshTokenService refreshTokenService
     ) {
         this.tokenVerifier = tokenVerifier;
         this.providersRepository = providersRepository;
         this.usersRepository = usersRepository;
         this.tutorsRepository = tutorsRepository;
         this.internalTokenService = internalTokenService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @Transactional
@@ -55,12 +59,44 @@ public class AuthService {
                 .map(tutors -> tutors.getName())
                 .orElse(identity.name());
 
+        RefreshTokenService.IssuedRefreshToken refreshToken = refreshTokenService.issue(savedUsers);
+
+        return response(savedUsers, responseName, refreshToken);
+    }
+
+    @Transactional
+    public LoginResponse refresh(String rawRefreshToken) {
+        RefreshToken oldRefreshToken = refreshTokenService.consume(rawRefreshToken);
+        Users user = oldRefreshToken.getUser();
+
+        String responseName = tutorsRepository.findByUserId(user.getId())
+                .map(tutors -> tutors.getName())
+                .orElse(null);
+        RefreshTokenService.IssuedRefreshToken newRefreshToken =
+                refreshTokenService.issue(user, oldRefreshToken.getFamilyId());
+        oldRefreshToken.replacedBy(refreshTokenService.sha256(newRefreshToken.raw()));
+
+        return response(user, responseName, newRefreshToken);
+    }
+
+    @Transactional
+    public void logout(UUID userId) {
+        refreshTokenService.revokeAllForUser(userId);
+    }
+
+    private LoginResponse response(
+            Users user,
+            String name,
+            RefreshTokenService.IssuedRefreshToken refreshToken
+    ) {
         return new LoginResponse(
-                internalTokenService.issue(savedUsers, responseName),
-                savedUsers.getId(),
-                responseName,
-                savedUsers.getEmail(),
-                savedUsers.getRole().name()
+                internalTokenService.issue(user, name),
+                user.getId(),
+                name,
+                user.getEmail(),
+                user.getRole().name(),
+                refreshToken.raw(),
+                refreshToken.expiresAt()
         );
     }
 

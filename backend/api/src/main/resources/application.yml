@@ -32,5 +32,6 @@ app:
     issuer: ${AUTH_JWT_ISSUER:pocapi}
     jwt-secret: ${AUTH_JWT_SECRET}
     token-ttl: ${AUTH_JWT_TTL:PT1H}
+    refresh-ttl: ${AUTH_REFRESH_TTL:P30D}
     apple-client-id: ${AUTH_APPLE_CLIENT_ID:}
     google-client-id: ${AUTH_GOOGLE_CLIENT_ID:}

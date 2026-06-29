@@ -1,163 +1,141 @@
 # 02 - Modelo de dados, entidades e repositories
 
-O pacote `User` contem as entidades JPA que mapeiam o modelo novo do banco. Apesar do pacote se chamar `User`, ele contem tambem `Providers`, `Admins` e `Tutors`, porque todos fazem parte da identidade e perfil do usuario.
+O modelo atual separa identidade social, usuario interno, perfil de tutor e sessao renovavel.
 
-## `Providers`
+## `providers`
 
-Arquivo: `backend/api/src/main/java/com/jordania/api/User/Providers.java`
+Entidade: `Providers`
 
-Mapeia a tabela `providers`.
-
-Campos principais:
-
-- `provider_subject`: chave primaria. E o subject recebido do provider social.
-- `provider_name`: nome do provider, hoje `apple` ou `google`.
-
-Exemplo conceitual:
-
-```text
-provider_subject = "001234.apple-sub"
-provider_name    = "apple"
-```
-
-Essa tabela existe para separar a identidade externa do usuario interno da API.
-
-O repository correspondente e `ProvidersRepository`, que estende `JpaRepository<Providers, String>`. A chave usada pelo repository e `provider_subject`.
-
-## `Users`
-
-Arquivo: `backend/api/src/main/java/com/jordania/api/User/Users.java`
-
-Mapeia a tabela `users`.
+Representa a identidade social validada no login.
 
 Campos principais:
 
-- `id`: UUID interno da API.
-- `role`: enum `RoleType`, armazenado no PostgreSQL como `role_type`.
-- `email`: email vindo do provider, quando disponivel.
-- `provider`: relacao com `Providers`.
-- `created_at`: criacao do usuario interno.
-- `updated_at`: ultima atualizacao do usuario interno.
+- `provider_subject`: chave primaria, vinda do `sub` Apple/Google;
+- `provider_name`: `apple` ou `google`.
 
-Quando um usuario novo faz login, a API cria um `Users` com:
+Repository: `ProvidersRepository`.
 
-- UUID novo;
-- role `tutor`;
-- provider social associado;
-- email se o provider enviou.
+## `users`
 
-Esse `id` vira o `sub` do JWT interno. Ou seja, quando o app chama endpoints autenticados, a API identifica o usuario pelo `users.id`.
+Entidade: `Users`
 
-O metodo `updateEmail` atualiza o email apenas quando o provider envia um valor nao vazio. Ele tambem atualiza `updated_at`.
+Representa o usuario interno da API. O `id` desta tabela e usado como `sub` do JWT interno.
 
-O repository correspondente e `UsersRepository`. A consulta mais importante e:
+Campos principais:
+
+- `id`: UUID interno;
+- `role`: enum `role_type`, hoje `tutor` ou `admin`;
+- `email`;
+- `provider`: referencia `providers.provider_subject`;
+- `created_at`;
+- `updated_at`.
+
+Repository: `UsersRepository`.
+
+Busca importante:
 
 ```java
 findByProviderProviderSubject(String provider_subject)
 ```
 
-Ela encontra o usuario interno a partir do subject do provider social.
+## `tutors`
 
-## `RoleType`
+Entidade: `Tutors`
 
-Arquivo: `backend/api/src/main/java/com/jordania/api/User/RoleType.java`
-
-Define os roles aceitos:
-
-```java
-public enum RoleType {
-    tutor,
-    admin
-}
-```
-
-Os nomes estao em minusculo para casar exatamente com o enum do PostgreSQL:
-
-```sql
-CREATE TYPE role_type AS ENUM ('tutor', 'admin');
-```
-
-Hoje, todo usuario criado automaticamente pelo login recebe role `tutor`.
-
-## `Admins`
-
-Arquivo: `backend/api/src/main/java/com/jordania/api/User/Admins.java`
-
-Mapeia a tabela `admins`.
+Representa o perfil de tutor do usuario.
 
 Campos principais:
 
-- `id`: UUID da linha de admin.
-- `user`: relacao com `Users`.
+- `id`: UUID do tutor;
+- `user`: referencia `users.id`;
+- `name`;
+- `username`;
+- `is_private`;
+- `img_url`;
+- `birthday`;
+- `updated_at`;
+- `reports_counter`.
 
-A tabela existe porque fazia parte da primeira fatia da modelagem. Nesta etapa ainda nao existem endpoints de administracao. Ela prepara o modelo para permitir que um `users` tambem tenha registro em `admins`.
+Repository: `TutorsRepository`.
 
-O repository correspondente e `AdminsRepository`.
-
-## `Tutors`
-
-Arquivo: `backend/api/src/main/java/com/jordania/api/User/Tutors.java`
-
-Mapeia a tabela `tutors`.
-
-Campos principais:
-
-- `id`: UUID do tutor.
-- `user`: relacao um-para-um com `Users`.
-- `name`: nome do tutor.
-- `username`: nome publico unico.
-- `is_private`: se o perfil e privado.
-- `img_url`: URL ou texto da imagem, opcional.
-- `birthday`: data de nascimento.
-- `updated_at`: ultima atualizacao do tutor.
-- `reports_counter`: contador de denuncias, inicia em `0`.
-
-O construtor de `Tutors` gera UUID novo, associa o `Users`, inicia `reports_counter = 0` e chama `update`.
-
-O metodo `update` atualiza:
-
-- `name`
-- `username`
-- `is_private`
-- `img_url`
-- `birthday`
-- `updated_at`
-
-`img_url` e normalizado: string vazia vira `null`.
-
-O repository correspondente e `TutorsRepository`. As consultas importantes sao:
+Buscas importantes:
 
 ```java
 findByUserId(UUID user_id)
-```
-
-Usada para carregar o tutor do usuario autenticado em `/api/tutors/me`.
-
-```java
 findByUsername(String username)
 ```
 
-Usada para impedir username duplicado.
+## `admins`
 
-## Relacionamento geral
+Entidade: `Admins`
 
-O fluxo de relacionamento fica assim:
+Hoje prepara o modelo para usuarios administradores. A autorizacao por role ja esta pronta no JWT e no `SecurityConfig`.
+
+Repository: `AdminsRepository`.
+
+## `refresh_tokens`
+
+Entidade: `RefreshToken`
+
+Representa um refresh token emitido para um usuario. O token bruto e retornado ao cliente somente uma vez; o banco guarda apenas o hash.
+
+Campos principais:
+
+- `id`: sequencial interno;
+- `token_hash`: SHA-256 do refresh token bruto;
+- `family_id`: identifica a familia de rotacao;
+- `user`: referencia `users.id`;
+- `expires_at`;
+- `revoked_at`;
+- `replaced_by`: hash do token que substituiu este token;
+- `created_at`.
+
+Repository: `RefreshTokenRepository`.
+
+Operacoes importantes:
+
+```java
+findByTokenHash(String tokenHash)
+revokeFamily(UUID familyId)
+revokeAllForUser(UUID userId)
+```
+
+## Relacoes
 
 ```text
 providers.provider_subject
-        |
-        | users.provider_id
-        v
+    -> users.provider_id
+
 users.id
-        |
-        | tutors.user_id
-        v
-tutors
+    -> tutors.user_id
+    -> admins.user_id
+    -> refresh_tokens.user_id
 ```
 
-Em palavras:
+## DTOs de sessao
 
-1. O provider social identifica uma pessoa por `provider_subject`.
-2. A API transforma isso em um usuario interno em `users`.
-3. O usuario interno pode criar um perfil de tutor em `tutors`.
+`LoginResponse` retorna access token, dados basicos do usuario, role e refresh token:
 
+```json
+{
+  "token": "jwt-interno",
+  "userId": "uuid",
+  "name": "Nome ou null",
+  "email": "email@example.com",
+  "role": "tutor",
+  "refreshToken": "token-opaco",
+  "refreshExpiresAt": "2026-07-26T12:00:00Z"
+}
+```
+
+`UserResponse`, usado por `/users/me`, retorna:
+
+```json
+{
+  "id": "uuid",
+  "email": "email@example.com",
+  "provider": "google",
+  "role": "tutor",
+  "name": "Nome do tutor ou null"
+}
+```

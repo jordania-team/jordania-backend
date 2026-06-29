@@ -1,188 +1,92 @@
 # 04 - AuthService, JWT interno, roles e security
 
-Depois que o token Apple/Google e validado, a API nao usa esse token social para proteger os endpoints internos. Ela emite um JWT proprio, chamado aqui de JWT interno.
+`AuthService` coordena login social, emissao de access token, refresh token, refresh de sessao e logout.
 
-O token social serve para provar identidade no login. O JWT interno serve para chamar `/api/**`.
+## Login
 
-## `AuthService`
+`login(LoginRequest)` faz:
 
-Arquivo: `AuthService.java`
+1. valida o token social com `SocialTokenVerifier`;
+2. normaliza provider para `apple` ou `google`;
+3. cria ou reutiliza `providers`;
+4. cria ou reutiliza `users`;
+5. atualiza email quando o provider envia email valido;
+6. usa `tutors.name` como nome de resposta quando ja existir;
+7. emite access token com `InternalTokenService`;
+8. emite refresh token com `RefreshTokenService`.
 
-Fluxo do metodo `login`:
+## Refresh
 
-1. Recebe `LoginRequest`.
-2. Chama `SocialTokenVerifier.verify`.
-3. Recebe um `SocialIdentity`.
-4. Normaliza o provider para `apple` ou `google`.
-5. Faz upsert em `providers`.
-6. Faz upsert em `users`.
-7. Busca nome do tutor, se ja existir.
-8. Emite JWT interno.
-9. Retorna `LoginResponse`.
+`refresh(String rawRefreshToken)` faz:
 
-## Upsert em `providers`
+1. calcula SHA-256 do token recebido;
+2. busca `refresh_tokens.token_hash`;
+3. rejeita token inexistente, expirado ou revogado;
+4. emite novo access token;
+5. emite novo refresh token na mesma `family_id`;
+6. marca o token antigo como revogado e preenche `replaced_by`;
+7. retorna o mesmo contrato de `LoginResponse`.
 
-A busca e feita por `identity.subject()`, que vira `provider_subject`.
+Se um token ja revogado for usado novamente, a API considera reuse detection e revoga toda a familia.
 
-Se o provider ainda nao existe:
+## Logout
 
-```java
-new Providers(identity.subject(), providerName)
-```
+`logout(UUID userId)` revoga todos os refresh tokens ativos do usuario. O access token atual continua valido ate expirar, porque a API nao mantem blacklist de access token.
 
-Se ja existe, a API confirma se o `provider_name` e o mesmo. Se o mesmo `provider_subject` aparecer com outro provider, a API rejeita:
+## JWT interno
 
-```text
-Provider subject already belongs to another provider
-```
+`InternalTokenService` emite JWT HS256 com:
 
-Essa protecao existe porque `provider_subject` e chave primaria global em `providers`.
-
-## Upsert em `users`
-
-Depois de resolver `providers`, a API procura:
-
-```java
-findByProviderProviderSubject(providers.getProvider_subject())
-```
-
-Se nao existir usuario interno, cria:
-
-```java
-new Users(providers, identity.email())
-```
-
-Esse construtor define:
-
-- `id`: UUID novo;
-- `role`: `tutor`;
-- `provider`: provider social validado;
-- `email`: email vindo do provider, se houver;
-- timestamps atuais.
-
-Se o usuario ja existir, a API atualiza o email quando o provider envia um email valido.
-
-## Nome retornado no login
-
-O `LoginResponse.name` tenta usar primeiro o nome salvo em `tutors`:
-
-```java
-tutorsRepository.findByUserId(savedUsers.getId())
-```
-
-Se o tutor ainda nao existir, usa o nome vindo do provider social.
-
-Isso permite que, depois que o usuario cria o perfil de tutor, o login passe a refletir o nome do perfil.
-
-## `LoginResponse`
-
-Formato retornado:
-
-```json
-{
-  "token": "jwt-interno",
-  "userId": "uuid-do-users-id",
-  "name": "Nome",
-  "email": "email@example.com",
-  "role": "tutor"
-}
-```
-
-O app iOS guarda `token` e usa esse valor no header:
-
-```http
-Authorization: Bearer <token>
-```
-
-## `InternalTokenService`
-
-Arquivo: `InternalTokenService.java`
-
-Emite o JWT interno com algoritmo HS256.
-
-Configuracoes usadas:
-
-- `AUTH_JWT_SECRET`: segredo usado para assinar.
-- `AUTH_JWT_ISSUER`: issuer, default `pocapi`.
-- `AUTH_JWT_TTL`: tempo de vida, default `PT1H`.
-
-Claims emitidos:
-
-- `iss`: issuer da API.
-- `iat`: data de emissao.
-- `exp`: expiracao.
-- `sub`: `users.id`.
-- `provider`: `apple` ou `google`.
-- `role`: `tutor` ou `admin`.
-- `name`: quando disponivel.
+- `iss`: issuer configurado;
+- `iat`;
+- `exp`;
+- `sub`: `users.id`;
+- `provider`: `apple` ou `google`;
+- `role`: `tutor` ou `admin`;
+- `name`: quando disponivel;
 - `email`: quando disponivel.
 
-O ponto mais importante e:
+O ponto central e:
 
 ```text
 sub = users.id
 ```
 
-Isso faz com que endpoints internos consigam identificar o usuario autenticado sem consultar o provider social novamente.
+Controllers usam `Jwt.getSubject()` para identificar o usuario autenticado.
 
-## Validacao do JWT interno (Resource Server)
+## SecurityConfig
 
-A validacao do JWT interno nos endpoints `/api/**` e feita pelo Spring Security, atraves do `JwtDecoder` configurado em `SecurityConfig`. Nao existe mais validacao manual em controller, e a classe `InternalTokenVerifier` foi removida.
+Regras principais:
 
-O `JwtDecoder` (Nimbus, HS256) verifica automaticamente:
+- `POST /auth/login`: publico.
+- `POST /auth/refresh`: publico.
+- `OPTIONS /**`: publico.
+- `GET /actuator/health/**` e `/actuator/info`: publicos.
+- `/dev/**`: publico, mas o controller so existe no profile `local`.
+- `POST /auth/logout`: autenticado.
+- `/users/**`: autenticado.
+- `/api/tutors/**`: exige `ROLE_TUTOR`.
+- `/api/**`: autenticado.
 
-1. Assinatura com `AUTH_JWT_SECRET`.
-2. Claim `exp` ainda no futuro.
-3. Claim `iss` igual ao issuer configurado (`AUTH_JWT_ISSUER`).
-4. Header `typ = JWT`.
+`DispatcherType.FORWARD` e `DispatcherType.ERROR` ficam liberados para preservar respostas reais de erro, como `400`, `404` e `409`, sem mascara-las como `401` ou `403`.
 
-Se o token e ausente, invalido ou expirado, o Resource Server responde `401 Unauthorized` antes de chegar ao controller. O `sub` do token (igual a `users.id`) fica disponivel no `Authentication`, e o `TutorsController` o le via `Jwt.getSubject()`.
+## Roles
 
-## `SecurityConfig`
+O enum `RoleType` usa valores minusculos. O conversor de JWT transforma o claim `role` em authority Spring:
 
-Arquivo: `SecurityConfig.java`
+- `tutor` -> `ROLE_TUTOR`
+- `admin` -> `ROLE_ADMIN`
 
-A autenticacao e a autorizacao estao centralizadas no Spring Security. O filtro registra o Resource Server e define regras explicitas:
+Assim, `hasRole("TUTOR")` funciona sem exigir que o token carregue `ROLE_` no payload.
 
-```java
-.authorizeHttpRequests(authorize -> authorize
-    .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
-    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-    .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-    .requestMatchers(HttpMethod.GET, "/actuator/health/**", "/actuator/info").permitAll()
-    .requestMatchers("/api/tutors/**").hasRole("TUTOR")
-    .requestMatchers("/api/**").authenticated()
-    .anyRequest().authenticated()
-)
-.oauth2ResourceServer(oauth2 -> oauth2
-    .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter))
-)
+## DevAuthController
+
+`DevAuthController` existe apenas com `@Profile("local")`.
+
+Endpoint:
+
+```http
+POST /dev/login?userId=<uuid>
 ```
 
-Pontos importantes:
-
-- `POST /auth/login`, `OPTIONS /**`, `/actuator/health` e `/actuator/info` sao publicos.
-- `/api/tutors/**` exige `ROLE_TUTOR`; qualquer outro `/api/**` exige autenticacao.
-- A ordem importa: a regra de `/api/tutors/**` vem antes da regra mais ampla `/api/**`.
-- `DispatcherType.FORWARD` e `DispatcherType.ERROR` sao liberados. Isso e necessario porque o `AuthorizationFilter` roda em todos os dispatches; sem isso, um `404`, `400` ou `409` lancado pelo service seria reencaminhado para `/error` e mascarado como `401` ou `403`.
-
-## Beans definidos em `SecurityConfig`
-
-- `SecretKey`: cria a chave HS256 a partir de `AUTH_JWT_SECRET`.
-- `JwtEncoder`: usado por `InternalTokenService` para emitir o JWT interno.
-- `JwtDecoder`: valida o JWT interno (assinatura, `exp`, issuer e `typ`); usado pelo Resource Server.
-- `jwtAuthenticationConverter`: converte o claim `role` em authority Spring (`ROLE_TUTOR` ou `ROLE_ADMIN`), preservando valores que ja venham como `ROLE_*`.
-
-## Roles e authorities
-
-O enum `RoleType` usa valores em minusculo (`tutor`, `admin`). O `jwtAuthenticationConverter` mapeia esses valores para authorities em maiusculo com prefixo `ROLE_`:
-
-- `role=tutor` -> `ROLE_TUTOR`
-- `role=admin` -> `ROLE_ADMIN`
-
-Assim, regras como `hasRole("TUTOR")` e `hasRole("ADMIN")` funcionam de forma consistente. As regras de admin ja estao preparadas para endpoints futuros.
-
-## Beneficio da centralizacao
-
-Como a protecao de `/api/**` esta no Spring Security, qualquer novo endpoint `/api/**` ja nasce protegido. Os controllers nao precisam validar o token manualmente: basta declarar a regra adequada em `SecurityConfig` e ler o usuario autenticado via `Jwt`.
-
+Ele busca um `Users` existente e emite access token + refresh token sem passar por Apple/Google. Ele nao cria usuarios e nao deve estar ativo em producao.

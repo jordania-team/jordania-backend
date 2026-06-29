@@ -7,6 +7,9 @@ import com.jordania.api.Auth.LoginResponse;
 import com.jordania.api.Auth.SecurityConfig;
 import com.jordania.api.User.Providers;
 import com.jordania.api.User.RoleType;
+import com.jordania.api.User.UserController;
+import com.jordania.api.User.UserResponse;
+import com.jordania.api.User.UserService;
 import com.jordania.api.User.Users;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +36,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -40,7 +44,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest({TutorsController.class, AuthController.class})
+@WebMvcTest({TutorsController.class, AuthController.class, UserController.class})
 @Import(SecurityConfig.class)
 @TestPropertySource(properties = {
         "app.auth.jwt-secret=test-secret-with-at-least-thirty-two-bytes",
@@ -61,6 +65,9 @@ class TutorsControllerSecurityTest {
 
     @MockitoBean
     private AuthService authService;
+
+    @MockitoBean
+    private UserService userService;
 
     @Test
     void tokenIssuedByInternalTokenServiceIsAcceptedAndReachesService() throws Exception {
@@ -186,7 +193,7 @@ class TutorsControllerSecurityTest {
     @Test
     void loginEndpointStaysPublic() throws Exception {
         when(authService.login(any())).thenReturn(
-                new LoginResponse("internal-jwt", UUID.randomUUID(), "Taylor", "taylor@example.com", "tutor"));
+                loginResponse("internal-jwt", UUID.randomUUID()));
 
         String body = """
                 {
@@ -200,6 +207,64 @@ class TutorsControllerSecurityTest {
                         .content(body))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").value("internal-jwt"));
+    }
+
+    @Test
+    void refreshEndpointStaysPublic() throws Exception {
+        UUID userId = UUID.randomUUID();
+        when(authService.refresh("refresh-token")).thenReturn(loginResponse("new-internal-jwt", userId));
+
+        String body = """
+                {
+                  "refreshToken": "refresh-token"
+                }
+                """;
+
+        mockMvc.perform(post("/auth/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").value("new-internal-jwt"))
+                .andExpect(jsonPath("$.refreshToken").value("refresh-token-value"));
+    }
+
+    @Test
+    void logoutRequiresAuthentication() throws Exception {
+        mockMvc.perform(post("/auth/logout"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void logoutWithValidTokenRevokesRefreshTokens() throws Exception {
+        UUID userId = UUID.randomUUID();
+
+        mockMvc.perform(post("/auth/logout")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token(userId, ISSUER, "tutor", validExpiry())))
+                .andExpect(status().isNoContent());
+
+        verify(authService).logout(userId);
+    }
+
+    @Test
+    void usersMeRequiresAuthentication() throws Exception {
+        mockMvc.perform(get("/users/me"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void usersMeReturnsCurrentSession() throws Exception {
+        UUID userId = UUID.randomUUID();
+        when(userService.getMe(userId))
+                .thenReturn(new UserResponse(userId, "taylor@example.com", "google", "tutor", "Taylor"));
+
+        mockMvc.perform(get("/users/me")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token(userId, ISSUER, "tutor", validExpiry())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(userId.toString()))
+                .andExpect(jsonPath("$.email").value("taylor@example.com"))
+                .andExpect(jsonPath("$.provider").value("google"))
+                .andExpect(jsonPath("$.role").value("tutor"))
+                .andExpect(jsonPath("$.name").value("Taylor"));
     }
 
     @Test
@@ -241,6 +306,18 @@ class TutorsControllerSecurityTest {
         }
         JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).type("JWT").build();
         return jwtEncoder.encode(JwtEncoderParameters.from(header, claims.build())).getTokenValue();
+    }
+
+    private LoginResponse loginResponse(String token, UUID userId) {
+        return new LoginResponse(
+                token,
+                userId,
+                "Taylor",
+                "taylor@example.com",
+                "tutor",
+                "refresh-token-value",
+                Instant.parse("2026-07-26T12:00:00Z")
+        );
     }
 
     private TutorsResponse tutorResponse(UUID userId) {

@@ -1,5 +1,6 @@
 package com.jordania.api.Auth;
 
+import java.time.Instant;
 import java.util.UUID;
 
 public record LoginResponse(
@@ -7,6 +8,8 @@ public record LoginResponse(
         UUID userId,
         String name,
         String email,
-        String role
+        String role,
+        String refreshToken,
+        Instant refreshExpiresAt
 ) {
 }
