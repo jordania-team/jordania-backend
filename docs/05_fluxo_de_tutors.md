@@ -13,9 +13,11 @@ Endpoints:
 ```http
 GET /api/tutors/me
 PUT /api/tutors/me
+POST /api/tutors/me/profile-image
+DELETE /api/tutors/me/profile-image
 ```
 
-Ambos exigem access token JWT interno com `role=tutor`.
+Todos exigem access token JWT interno com `role=tutor`.
 
 ## GET /api/tutors/me
 
@@ -27,6 +29,8 @@ Fluxo:
 4. O service busca `tutors` por `user_id`.
 5. Se nao existir tutor, retorna `404`.
 6. Se existir, retorna `TutorsResponse`.
+
+Quando `tutors.img_url` guarda uma chave S3, a resposta converte esse valor para uma URL assinada de exibicao. Se o valor for uma URL `http://` ou `https://`, a API devolve como esta, para manter compatibilidade com dados antigos.
 
 `404` aqui nao significa sessao invalida. Significa apenas que o usuario ainda nao criou perfil de tutor.
 
@@ -54,6 +58,43 @@ Fluxo:
 6. O service valida duplicidade de username.
 7. Se nao existir tutor, cria.
 8. Se existir tutor, atualiza.
+
+Para fotos novas, prefira `POST /api/tutors/me/profile-image` em vez de enviar `img_url` manualmente no `PUT`. O campo no `PUT` continua aceito para compatibilidade.
+
+## POST /api/tutors/me/profile-image
+
+Upload da foto de perfil do tutor autenticado.
+
+Regras:
+
+- exige `ROLE_TUTOR`;
+- exige que o perfil de tutor ja exista;
+- recebe `multipart/form-data` com campo `file`;
+- aceita `image/jpeg`, `image/png` e `image/webp`;
+- limite padrao: 5 MB;
+- grava no S3 em `uploads/tutors/{tutorId}/profile/{uuid}.ext`;
+- atualiza `tutors.img_url` com a chave S3;
+- retorna `TutorsResponse` com `img_url` pronto para exibicao.
+
+Exemplo:
+
+```bash
+curl -i -sS \
+  -X POST http://localhost:8080/api/tutors/me/profile-image \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "file=@/caminho/avatar.png"
+```
+
+## DELETE /api/tutors/me/profile-image
+
+Remove a foto de perfil do tutor autenticado.
+
+Fluxo:
+
+1. Busca o tutor atual.
+2. Limpa `tutors.img_url`.
+3. Se o valor antigo era uma chave S3, remove o objeto do bucket.
+4. Retorna `TutorsResponse` com `img_url: null`.
 
 ## Validacoes
 

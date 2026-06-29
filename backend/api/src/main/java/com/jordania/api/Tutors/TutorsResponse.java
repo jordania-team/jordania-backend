@@ -5,6 +5,7 @@ import com.jordania.api.User.Tutors;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.function.Function;
 
 public record TutorsResponse(
         UUID id,
@@ -30,13 +31,17 @@ public record TutorsResponse(
         int reports_counter
 ) {
     public static TutorsResponse from(Tutors tutors) {
+        return from(tutors, value -> value);
+    }
+
+    public static TutorsResponse from(Tutors tutors, Function<String, String> imageUrlResolver) {
         return new TutorsResponse(
                 tutors.getId(),
                 tutors.getUser().getId(),
                 tutors.getName(),
                 tutors.getUsername(),
                 tutors.isIs_private(),
-                tutors.getImg_url(),
+                imageUrlResolver.apply(tutors.getImg_url()),
                 tutors.getBirthday(),
                 tutors.getUpdated_at(),
                 tutors.getReports_counter()

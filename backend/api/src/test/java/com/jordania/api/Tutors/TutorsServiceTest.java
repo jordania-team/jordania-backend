@@ -1,5 +1,6 @@
 package com.jordania.api.Tutors;
 
+import com.jordania.api.Storage.ImageStorageService;
 import com.jordania.api.User.Providers;
 import com.jordania.api.User.RoleType;
 import com.jordania.api.User.Tutors;
@@ -8,6 +9,7 @@ import com.jordania.api.User.Users;
 import com.jordania.api.User.UsersRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.mock.web.MockMultipartFile;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -23,6 +25,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class TutorsServiceTest {
@@ -34,6 +38,9 @@ class TutorsServiceTest {
 
     @Mock
     private UsersRepository usersRepository;
+
+    @Mock
+    private ImageStorageService imageStorageService;
 
     @InjectMocks
     private TutorsService tutorsService;
@@ -64,6 +71,8 @@ class TutorsServiceTest {
         when(tutorsRepository.findByUserId(user_id)).thenReturn(Optional.empty());
         when(tutorsRepository.findByUsername("rodrigo.borges")).thenReturn(Optional.empty());
         when(tutorsRepository.save(any(Tutors.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(imageStorageService.displayUrl("https://example.com/avatar.png"))
+                .thenReturn("https://example.com/avatar.png");
 
         TutorsResponse response = tutorsService.saveMe(user_id, request);
 
@@ -77,6 +86,7 @@ class TutorsServiceTest {
         assertThat(response.user_id()).isEqualTo(user_id);
         assertThat(response.username()).isEqualTo("rodrigo.borges");
         assertThat(response.is_private()).isFalse();
+        assertThat(response.img_url()).isEqualTo("https://example.com/avatar.png");
         assertThat(response.reports_counter()).isZero();
     }
 
@@ -114,6 +124,75 @@ class TutorsServiceTest {
     }
 
     @Test
+    void saveMePreservesExistingProfileImageWhenRequestOmitsImageUrl() {
+        UUID user_id = UUID.randomUUID();
+        Users user = user(user_id);
+        String imageKey = "uploads/tutors/profile/avatar.png";
+        Tutors existing = new Tutors(
+                user,
+                "Old Name",
+                "old.name",
+                false,
+                imageKey,
+                BIRTHDAY
+        );
+        TutorsRequest request = new TutorsRequest(
+                "New Name",
+                "new.name",
+                true,
+                null,
+                BIRTHDAY.plusYears(1)
+        );
+
+        when(usersRepository.findById(user_id)).thenReturn(Optional.of(user));
+        when(tutorsRepository.findByUserId(user_id)).thenReturn(Optional.of(existing));
+        when(tutorsRepository.findByUsername("new.name")).thenReturn(Optional.empty());
+        when(tutorsRepository.save(existing)).thenReturn(existing);
+        when(imageStorageService.displayUrl(imageKey)).thenReturn("https://signed.example.com/avatar.png");
+
+        TutorsResponse response = tutorsService.saveMe(user_id, request);
+
+        assertThat(existing.getImg_url()).isEqualTo(imageKey);
+        assertThat(response.img_url()).isEqualTo("https://signed.example.com/avatar.png");
+        verify(imageStorageService, never()).deleteIfStoredObject(any());
+    }
+
+    @Test
+    void saveMePreservesExistingProfileImageWhenRequestSendsCurrentDisplayUrl() {
+        UUID user_id = UUID.randomUUID();
+        Users user = user(user_id);
+        String imageKey = "uploads/tutors/profile/avatar.png";
+        String signedUrl = "https://signed.example.com/uploads/tutors/profile/avatar.png?X-Amz-Signature=abc";
+        Tutors existing = new Tutors(
+                user,
+                "Old Name",
+                "old.name",
+                false,
+                imageKey,
+                BIRTHDAY
+        );
+        TutorsRequest request = new TutorsRequest(
+                "New Name",
+                "new.name",
+                true,
+                signedUrl,
+                BIRTHDAY.plusYears(1)
+        );
+
+        when(usersRepository.findById(user_id)).thenReturn(Optional.of(user));
+        when(tutorsRepository.findByUserId(user_id)).thenReturn(Optional.of(existing));
+        when(tutorsRepository.findByUsername("new.name")).thenReturn(Optional.empty());
+        when(tutorsRepository.save(existing)).thenReturn(existing);
+        when(imageStorageService.isDisplayUrlForStoredObject(signedUrl, imageKey)).thenReturn(true);
+        when(imageStorageService.displayUrl(imageKey)).thenReturn(signedUrl);
+
+        TutorsResponse response = tutorsService.saveMe(user_id, request);
+
+        assertThat(existing.getImg_url()).isEqualTo(imageKey);
+        assertThat(response.img_url()).isEqualTo(signedUrl);
+    }
+
+    @Test
     void saveMeReturnsConflictWhenUsernameBelongsToAnotherTutor() {
         UUID user_id = UUID.randomUUID();
         Users user = user(user_id);
@@ -140,6 +219,93 @@ class TutorsServiceTest {
         assertThatThrownBy(() -> tutorsService.saveMe(user_id, request))
                 .isInstanceOfSatisfying(ResponseStatusException.class, exception ->
                         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.CONFLICT));
+    }
+
+    @Test
+    void uploadProfileImageStoresS3KeyAndReturnsDisplayUrl() {
+        UUID user_id = UUID.randomUUID();
+        Users user = user(user_id);
+        Tutors existing = new Tutors(
+                user,
+                "Taylor",
+                "taylor",
+                false,
+                null,
+                BIRTHDAY
+        );
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "avatar.png",
+                "image/png",
+                new byte[]{1, 2, 3}
+        );
+        String imageKey = "uploads/tutors/%s/profile/avatar.png".formatted(existing.getId());
+
+        when(tutorsRepository.findByUserId(user_id)).thenReturn(Optional.of(existing));
+        when(imageStorageService.uploadTutorProfileImage(existing.getId(), file)).thenReturn(imageKey);
+        when(tutorsRepository.save(existing)).thenReturn(existing);
+        when(imageStorageService.displayUrl(imageKey)).thenReturn("https://signed.example.com/avatar.png");
+
+        TutorsResponse response = tutorsService.uploadProfileImage(user_id, file);
+
+        assertThat(existing.getImg_url()).isEqualTo(imageKey);
+        assertThat(response.img_url()).isEqualTo("https://signed.example.com/avatar.png");
+    }
+
+    @Test
+    void uploadProfileImageDeletesPreviousStoredObjectWhenImageChanges() {
+        UUID user_id = UUID.randomUUID();
+        Users user = user(user_id);
+        String previousImageKey = "uploads/tutors/profile/old-avatar.png";
+        Tutors existing = new Tutors(
+                user,
+                "Taylor",
+                "taylor",
+                false,
+                previousImageKey,
+                BIRTHDAY
+        );
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "avatar.png",
+                "image/png",
+                new byte[]{1, 2, 3}
+        );
+        String newImageKey = "uploads/tutors/%s/profile/new-avatar.png".formatted(existing.getId());
+
+        when(tutorsRepository.findByUserId(user_id)).thenReturn(Optional.of(existing));
+        when(imageStorageService.uploadTutorProfileImage(existing.getId(), file)).thenReturn(newImageKey);
+        when(tutorsRepository.save(existing)).thenReturn(existing);
+        when(imageStorageService.displayUrl(newImageKey)).thenReturn("https://signed.example.com/new-avatar.png");
+
+        TutorsResponse response = tutorsService.uploadProfileImage(user_id, file);
+
+        assertThat(existing.getImg_url()).isEqualTo(newImageKey);
+        assertThat(response.img_url()).isEqualTo("https://signed.example.com/new-avatar.png");
+        verify(imageStorageService).deleteIfStoredObject(previousImageKey);
+    }
+
+    @Test
+    void deleteProfileImageClearsTutorImageAndDeletesStoredObject() {
+        UUID user_id = UUID.randomUUID();
+        String imageKey = "uploads/tutors/profile/avatar.png";
+        Tutors existing = new Tutors(
+                user(user_id),
+                "Taylor",
+                "taylor",
+                false,
+                imageKey,
+                BIRTHDAY
+        );
+
+        when(tutorsRepository.findByUserId(user_id)).thenReturn(Optional.of(existing));
+        when(tutorsRepository.save(existing)).thenReturn(existing);
+
+        TutorsResponse response = tutorsService.deleteProfileImage(user_id);
+
+        assertThat(existing.getImg_url()).isNull();
+        assertThat(response.img_url()).isNull();
+        verify(imageStorageService).deleteIfStoredObject(imageKey);
     }
 
     private Users user(UUID user_id) {

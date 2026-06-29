@@ -23,9 +23,11 @@ import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
@@ -39,6 +41,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -188,6 +192,36 @@ class TutorsControllerSecurityTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void postProfileImageWithValidTokenReachesService() throws Exception {
+        UUID userId = UUID.randomUUID();
+        when(tutorsService.uploadProfileImage(eq(userId), any(MultipartFile.class)))
+                .thenReturn(tutorResponse(userId));
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "avatar.png",
+                "image/png",
+                new byte[]{1, 2, 3}
+        );
+
+        mockMvc.perform(multipart("/api/tutors/me/profile-image")
+                        .file(file)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token(userId, ISSUER, "tutor", validExpiry())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.user_id").value(userId.toString()));
+    }
+
+    @Test
+    void deleteProfileImageWithValidTokenReachesService() throws Exception {
+        UUID userId = UUID.randomUUID();
+        when(tutorsService.deleteProfileImage(eq(userId))).thenReturn(tutorResponse(userId));
+
+        mockMvc.perform(delete("/api/tutors/me/profile-image")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token(userId, ISSUER, "tutor", validExpiry())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.user_id").value(userId.toString()));
     }
 
     @Test

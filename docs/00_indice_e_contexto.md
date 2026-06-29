@@ -33,6 +33,8 @@ Tutor:
 
 - `GET /api/tutors/me`
 - `PUT /api/tutors/me`
+- `POST /api/tutors/me/profile-image`
+- `DELETE /api/tutors/me/profile-image`
 
 Desenvolvimento local:
 
@@ -57,6 +59,7 @@ As migrations Flyway atuais sao:
 5. `05_fluxo_de_tutors.md`
 6. `06_fluxos_de_requisicao_e_debug.md`
 7. `07_refresh_tokens_e_sessao.md`
+8. `08_imagens_s3.md`
 
 ## Regra central
 

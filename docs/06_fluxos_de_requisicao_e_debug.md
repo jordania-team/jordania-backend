@@ -99,6 +99,25 @@ curl -i -sS \
   }'
 ```
 
+Enviar foto de perfil:
+
+```bash
+curl -i -sS \
+  -X POST http://localhost:8080/api/tutors/me/profile-image \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "file=@/caminho/avatar.png"
+```
+
+Remover foto de perfil:
+
+```bash
+curl -i -sS \
+  -X DELETE http://localhost:8080/api/tutors/me/profile-image \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Quando a API usa S3 privado, `img_url` na resposta e uma URL assinada temporaria. Se ela expirar no app, chame `GET /api/tutors/me` de novo.
+
 ## DevAuth local
 
 Com profile local ativo:
@@ -129,7 +148,7 @@ JOIN providers p ON p.provider_subject = u.provider_id;
 Ver tutors:
 
 ```sql
-SELECT id, user_id, name, username, is_private, updated_at
+SELECT id, user_id, name, username, is_private, img_url, updated_at
 FROM tutors;
 ```
 

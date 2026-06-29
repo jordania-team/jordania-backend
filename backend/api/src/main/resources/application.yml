@@ -18,6 +18,11 @@ spring:
   flyway:
     enabled: true
 
+  servlet:
+    multipart:
+      max-file-size: ${POCAPI_IMAGES_MAX_FILE_SIZE:5MB}
+      max-request-size: ${POCAPI_IMAGES_MAX_REQUEST_SIZE:6MB}
+
 server:
   port: ${SERVER_PORT:8080}
 
@@ -35,3 +40,10 @@ app:
     refresh-ttl: ${AUTH_REFRESH_TTL:P30D}
     apple-client-id: ${AUTH_APPLE_CLIENT_ID:}
     google-client-id: ${AUTH_GOOGLE_CLIENT_ID:}
+  storage:
+    images:
+      bucket: ${POCAPI_IMAGES_BUCKET:}
+      region: ${AWS_REGION:us-east-1}
+      presigned-url-ttl: ${POCAPI_IMAGES_PRESIGNED_URL_TTL:PT15M}
+      public-base-url: ${POCAPI_IMAGES_PUBLIC_BASE_URL:}
+      max-size-bytes: ${POCAPI_IMAGES_MAX_SIZE_BYTES:5242880}

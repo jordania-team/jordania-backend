@@ -51,7 +51,7 @@ Campos principais:
 - `name`;
 - `username`;
 - `is_private`;
-- `img_url`;
+- `img_url`: hoje guarda URL externa legada ou chave interna S3; a API retorna esse campo como URL de exibicao;
 - `birthday`;
 - `updated_at`;
 - `reports_counter`.

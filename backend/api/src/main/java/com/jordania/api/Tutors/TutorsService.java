@@ -1,5 +1,6 @@
 package com.jordania.api.Tutors;
 
+import com.jordania.api.Storage.ImageStorageService;
 import com.jordania.api.User.Tutors;
 import com.jordania.api.User.TutorsRepository;
 import com.jordania.api.User.Users;
@@ -7,6 +8,7 @@ import com.jordania.api.User.UsersRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
@@ -21,17 +23,21 @@ public class TutorsService {
 
     private final TutorsRepository tutorsRepository;
     private final UsersRepository usersRepository;
+    private final ImageStorageService imageStorageService;
 
-    public TutorsService(TutorsRepository tutorsRepository, UsersRepository usersRepository) {
+    public TutorsService(
+            TutorsRepository tutorsRepository,
+            UsersRepository usersRepository,
+            ImageStorageService imageStorageService
+    ) {
         this.tutorsRepository = tutorsRepository;
         this.usersRepository = usersRepository;
+        this.imageStorageService = imageStorageService;
     }
 
     @Transactional(readOnly = true)
     public TutorsResponse findMe(UUID user_id) {
-        Tutors tutors = tutorsRepository.findByUserId(user_id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        return TutorsResponse.from(tutors);
+        return response(tutorByUserId(user_id));
     }
 
     @Transactional
@@ -68,12 +74,73 @@ public class TutorsService {
                     name,
                     username,
                     request.is_private(),
-                    request.img_url(),
+                    imageForUpdate(tutors, request.img_url()),
                     birthday
             );
         }
 
-        return TutorsResponse.from(tutorsRepository.save(tutors));
+        return response(tutorsRepository.save(tutors));
+    }
+
+    @Transactional
+    public TutorsResponse uploadProfileImage(UUID user_id, MultipartFile file) {
+        Tutors tutors = tutorByUserId(user_id);
+        String previousImage = tutors.getImg_url();
+        String imageKey = imageStorageService.uploadTutorProfileImage(tutors.getId(), file);
+
+        tutors.update(
+                tutors.getName(),
+                tutors.getUsername(),
+                tutors.isIs_private(),
+                imageKey,
+                tutors.getBirthday()
+        );
+
+        Tutors saved = tutorsRepository.save(tutors);
+        if (previousImage != null && !previousImage.isBlank() && !imageKey.equals(previousImage)) {
+            imageStorageService.deleteIfStoredObject(previousImage);
+        }
+        return response(saved);
+    }
+
+    @Transactional
+    public TutorsResponse deleteProfileImage(UUID user_id) {
+        Tutors tutors = tutorByUserId(user_id);
+        String storedImage = tutors.getImg_url();
+        if (storedImage == null || storedImage.isBlank()) {
+            return response(tutors);
+        }
+
+        tutors.update(
+                tutors.getName(),
+                tutors.getUsername(),
+                tutors.isIs_private(),
+                null,
+                tutors.getBirthday()
+        );
+
+        Tutors saved = tutorsRepository.save(tutors);
+        imageStorageService.deleteIfStoredObject(storedImage);
+        return response(saved);
+    }
+
+    private Tutors tutorByUserId(UUID user_id) {
+        return tutorsRepository.findByUserId(user_id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
+    private TutorsResponse response(Tutors tutors) {
+        return TutorsResponse.from(tutors, imageStorageService::displayUrl);
+    }
+
+    private String imageForUpdate(Tutors tutors, String requestedImage) {
+        if (requestedImage == null || requestedImage.isBlank()) {
+            return tutors.getImg_url();
+        }
+        if (imageStorageService.isDisplayUrlForStoredObject(requestedImage, tutors.getImg_url())) {
+            return tutors.getImg_url();
+        }
+        return requestedImage;
     }
 
     private String normalizedRequired(String value, String field) {
