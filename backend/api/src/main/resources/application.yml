@@ -18,8 +18,39 @@ spring:
   flyway:
     enabled: true
 
+<<<<<<< HEAD
+=======
+  servlet:
+    multipart:
+      max-file-size: ${POCAPI_IMAGES_MAX_FILE_SIZE:5MB}
+      max-request-size: ${POCAPI_IMAGES_MAX_REQUEST_SIZE:6MB}
+
+server:
+  port: ${SERVER_PORT:8080}
+
+>>>>>>> rodrigo+ferrari
 management:
   endpoints:
     web:
       exposure:
+<<<<<<< HEAD
         include: health,info
+=======
+        include: health,info
+
+app:
+  auth:
+    issuer: ${AUTH_JWT_ISSUER:pocapi}
+    jwt-secret: ${AUTH_JWT_SECRET}
+    token-ttl: ${AUTH_JWT_TTL:PT1H}
+    refresh-ttl: ${AUTH_REFRESH_TTL:P30D}
+    apple-client-id: ${AUTH_APPLE_CLIENT_ID:}
+    google-client-id: ${AUTH_GOOGLE_CLIENT_ID:}
+  storage:
+    images:
+      bucket: ${POCAPI_IMAGES_BUCKET:}
+      region: ${AWS_REGION:us-east-1}
+      presigned-url-ttl: ${POCAPI_IMAGES_PRESIGNED_URL_TTL:PT15M}
+      public-base-url: ${POCAPI_IMAGES_PUBLIC_BASE_URL:}
+      max-size-bytes: ${POCAPI_IMAGES_MAX_SIZE_BYTES:5242880}
+>>>>>>> rodrigo+ferrari

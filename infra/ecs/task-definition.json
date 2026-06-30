@@ -13,7 +13,7 @@
   "containerDefinitions": [
     {
       "name": "pocapi",
-      "image": "964775859627.dkr.ecr.us-east-1.amazonaws.com/pocapi:auth-v2-20260610-092440",
+      "image": "964775859627.dkr.ecr.us-east-1.amazonaws.com/pocapi:profile-images-20260629-093716",
       "essential": true,
       "portMappings": [
         {
@@ -59,6 +59,10 @@
         {
           "name": "AUTH_APPLE_CLIENT_ID",
           "valueFrom": "arn:aws:ssm:us-east-1:964775859627:parameter/pocapi/prod/auth/apple-client-id"
+        },
+        {
+          "name": "AUTH_GOOGLE_CLIENT_ID",
+          "valueFrom": "arn:aws:ssm:us-east-1:964775859627:parameter/pocapi/prod/auth/google-client-id"
         }
       ],
       "logConfiguration": {

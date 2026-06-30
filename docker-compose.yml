@@ -26,6 +26,14 @@ services:
       SPRING_DATASOURCE_USERNAME: pocuser
       SPRING_DATASOURCE_PASSWORD: pocpass
       SERVER_PORT: 8080
+<<<<<<< HEAD
+=======
+      AUTH_JWT_SECRET: local-development-secret-change-before-deploy-1234567890
+      AUTH_APPLE_CLIENT_ID: rodrigoborges.TarefasPOC
+      AUTH_GOOGLE_CLIENT_ID: 982679807627-pdaiaiggjgg6p3qqq46oms0vfvmue61h.apps.googleusercontent.com
+      POCAPI_IMAGES_BUCKET: ${POCAPI_IMAGES_BUCKET:-}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+>>>>>>> rodrigo+ferrari
     ports:
       - "8080:8080"
     depends_on:
