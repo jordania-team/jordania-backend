@@ -1,6 +1,6 @@
 package com.jordania.api.Auth;
 
-import com.jordania.api.User.TutorsRepository;
+import com.jordania.api.tutor.TutorRepository;
 import com.jordania.api.User.Users;
 import com.jordania.api.User.UsersRepository;
 import org.springframework.context.annotation.Profile;
@@ -19,13 +19,13 @@ import java.util.UUID;
 public class DevAuthController {
 
     private final UsersRepository usersRepository;
-    private final TutorsRepository tutorsRepository;
+    private final TutorRepository tutorsRepository;
     private final InternalTokenService tokenService;
     private final RefreshTokenService refreshTokenService;
 
     public DevAuthController(
             UsersRepository usersRepository,
-            TutorsRepository tutorsRepository,
+            TutorRepository tutorsRepository,
             InternalTokenService tokenService,
             RefreshTokenService refreshTokenService
     ) {

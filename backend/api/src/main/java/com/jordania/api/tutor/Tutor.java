@@ -1,4 +1,4 @@
-package com.jordania.api.User;
+package com.jordania.api.tutor;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,10 +10,11 @@ import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import com.jordania.api.User.*;
 
 @Entity
 @Table(name = "tutors")
-public class Tutors {
+public class Tutor {
 
     @Id
     private UUID id;
@@ -43,10 +44,10 @@ public class Tutors {
     @Column(nullable = false)
     private int reports_counter;
 
-    protected Tutors() {
+    protected Tutor() {
     }
 
-    public Tutors(
+    public Tutor(
             Users user,
             String name,
             String username,

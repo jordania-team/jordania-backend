@@ -14,10 +14,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 
-import com.jordania.api.Pet.Pet;
-import com.jordania.api.Pet.PetDTO.PetRequestDTO;
-import com.jordania.api.Pet.PetRepository;
-import com.jordania.api.Pet.PetService;
+import com.jordania.api.pet.Pet;
+import com.jordania.api.pet.PetRepository;
+import com.jordania.api.pet.PetService;
+import com.jordania.api.pet.dto.PetRequestDTO;
 
 public class PetServiceUnitTest {
 
@@ -38,8 +38,12 @@ public class PetServiceUnitTest {
             "dog_user", "dog_name", null, null, null
         );
 
-        // doNothing().when(petRepository).save(any(Pet.class));
-        petRepository.save(any(Pet.class));
+        when(petRepository.save(any(Pet.class)))
+            .thenAnswer(invocation -> {
+                Pet pet = invocation.getArgument(0);
+                pet.setId(UUID.randomUUID());
+                return pet;
+            });
 
         when(petRepository.findById(any(UUID.class)))
             .thenAnswer(invocation -> {

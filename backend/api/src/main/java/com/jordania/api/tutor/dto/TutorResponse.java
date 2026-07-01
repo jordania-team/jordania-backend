@@ -1,13 +1,13 @@
-package com.jordania.api.Tutors;
+package com.jordania.api.tutor.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.jordania.api.User.Tutors;
+import com.jordania.api.tutor.Tutor;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.function.Function;
 
-public record TutorsResponse(
+public record TutorResponse(
         UUID id,
 
         @JsonProperty("user_id")
@@ -30,12 +30,12 @@ public record TutorsResponse(
         @JsonProperty("reports_counter")
         int reports_counter
 ) {
-    public static TutorsResponse from(Tutors tutors) {
+    public static TutorResponse from(Tutor tutors) {
         return from(tutors, value -> value);
     }
 
-    public static TutorsResponse from(Tutors tutors, Function<String, String> imageUrlResolver) {
-        return new TutorsResponse(
+    public static TutorResponse from(Tutor tutors, Function<String, String> imageUrlResolver) {
+        return new TutorResponse(
                 tutors.getId(),
                 tutors.getUser().getId(),
                 tutors.getName(),

@@ -1,8 +1,9 @@
-package com.jordania.api.Tutors;
+package com.jordania.api.tutor;
 
 import com.jordania.api.Storage.ImageStorageService;
-import com.jordania.api.User.Tutors;
-import com.jordania.api.User.TutorsRepository;
+import com.jordania.api.tutor.Tutor;
+import com.jordania.api.tutor.TutorRepository;
+import com.jordania.api.tutor.dto.*;
 import com.jordania.api.User.Users;
 import com.jordania.api.User.UsersRepository;
 import org.springframework.http.HttpStatus;
@@ -17,16 +18,16 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 @Service
-public class TutorsService {
+public class TutorService {
 
     private static final Pattern USERNAME_PATTERN = Pattern.compile("^[a-z0-9][a-z0-9._]{2,29}$");
 
-    private final TutorsRepository tutorsRepository;
+    private final TutorRepository tutorsRepository;
     private final UsersRepository usersRepository;
     private final ImageStorageService imageStorageService;
 
-    public TutorsService(
-            TutorsRepository tutorsRepository,
+    public TutorService(
+            TutorRepository tutorsRepository,
             UsersRepository usersRepository,
             ImageStorageService imageStorageService
     ) {
@@ -36,12 +37,12 @@ public class TutorsService {
     }
 
     @Transactional(readOnly = true)
-    public TutorsResponse findMe(UUID user_id) {
+    public TutorResponse findMe(UUID user_id) {
         return response(tutorByUserId(user_id));
     }
 
     @Transactional
-    public TutorsResponse saveMe(UUID user_id, TutorsRequest request) {
+    public TutorResponse saveMe(UUID user_id, TutorRequest request) {
         Users user = usersRepository.findById(user_id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
@@ -53,15 +54,15 @@ public class TutorsService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "birthday must be in the past");
         }
 
-        Tutors tutors = tutorsRepository.findByUserId(user_id).orElse(null);
-        Tutors existingUsernameOwner = tutorsRepository.findByUsername(username).orElse(null);
+        Tutor tutors = tutorsRepository.findByUserId(user_id).orElse(null);
+        Tutor existingUsernameOwner = tutorsRepository.findByUsername(username).orElse(null);
         if (existingUsernameOwner != null
                 && (tutors == null || !existingUsernameOwner.getId().equals(tutors.getId()))) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "username already exists");
         }
 
         if (tutors == null) {
-            tutors = new Tutors(
+            tutors = new Tutor(
                     user,
                     name,
                     username,
@@ -83,8 +84,8 @@ public class TutorsService {
     }
 
     @Transactional
-    public TutorsResponse uploadProfileImage(UUID user_id, MultipartFile file) {
-        Tutors tutors = tutorByUserId(user_id);
+    public TutorResponse uploadProfileImage(UUID user_id, MultipartFile file) {
+        Tutor tutors = tutorByUserId(user_id);
         String previousImage = tutors.getImg_url();
         String imageKey = imageStorageService.uploadTutorProfileImage(tutors.getId(), file);
 
@@ -96,7 +97,7 @@ public class TutorsService {
                 tutors.getBirthday()
         );
 
-        Tutors saved = tutorsRepository.save(tutors);
+        Tutor saved = tutorsRepository.save(tutors);
         if (previousImage != null && !previousImage.isBlank() && !imageKey.equals(previousImage)) {
             imageStorageService.deleteIfStoredObject(previousImage);
         }
@@ -104,8 +105,8 @@ public class TutorsService {
     }
 
     @Transactional
-    public TutorsResponse deleteProfileImage(UUID user_id) {
-        Tutors tutors = tutorByUserId(user_id);
+    public TutorResponse deleteProfileImage(UUID user_id) {
+        Tutor tutors = tutorByUserId(user_id);
         String storedImage = tutors.getImg_url();
         if (storedImage == null || storedImage.isBlank()) {
             return response(tutors);
@@ -119,21 +120,21 @@ public class TutorsService {
                 tutors.getBirthday()
         );
 
-        Tutors saved = tutorsRepository.save(tutors);
+        Tutor saved = tutorsRepository.save(tutors);
         imageStorageService.deleteIfStoredObject(storedImage);
         return response(saved);
     }
 
-    private Tutors tutorByUserId(UUID user_id) {
+    private Tutor tutorByUserId(UUID user_id) {
         return tutorsRepository.findByUserId(user_id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
-    private TutorsResponse response(Tutors tutors) {
-        return TutorsResponse.from(tutors, imageStorageService::displayUrl);
+    private TutorResponse response(Tutor tutors) {
+        return TutorResponse.from(tutors, imageStorageService::displayUrl);
     }
 
-    private String imageForUpdate(Tutors tutors, String requestedImage) {
+    private String imageForUpdate(Tutor tutors, String requestedImage) {
         if (requestedImage == null || requestedImage.isBlank()) {
             return tutors.getImg_url();
         }

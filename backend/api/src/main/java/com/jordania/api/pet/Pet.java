@@ -26,7 +26,7 @@ enum Species { // TODO: arrumar
 }
 
 @Entity
-@Table(name= "Pets")
+@Table(name= "pets")
 @Setter
 @Getter
 @AllArgsConstructor

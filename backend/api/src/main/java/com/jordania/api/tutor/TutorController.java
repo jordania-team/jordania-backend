@@ -1,4 +1,4 @@
-package com.jordania.api.Tutors;
+package com.jordania.api.tutor;
 
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
@@ -15,32 +15,34 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
+import com.jordania.api.tutor.TutorService;
+import com.jordania.api.tutor.dto.*;
 
 @RestController
 @RequestMapping("/api/tutors")
-public class TutorsController {
+public class TutorController {
 
-    private final TutorsService tutorsService;
+    private final TutorService tutorsService;
 
-    public TutorsController(TutorsService tutorsService) {
+    public TutorController(TutorService tutorsService) {
         this.tutorsService = tutorsService;
     }
 
     @GetMapping("/me")
-    public TutorsResponse me(@AuthenticationPrincipal Jwt jwt) {
+    public TutorResponse me(@AuthenticationPrincipal Jwt jwt) {
         return tutorsService.findMe(userId(jwt));
     }
 
     @PutMapping("/me")
-    public TutorsResponse saveMe(
+    public TutorResponse saveMe(
             @AuthenticationPrincipal Jwt jwt,
-            @RequestBody @Valid TutorsRequest request
+            @RequestBody @Valid TutorRequest request
     ) {
         return tutorsService.saveMe(userId(jwt), request);
     }
 
     @PostMapping(value = "/me/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public TutorsResponse uploadProfileImage(
+    public TutorResponse uploadProfileImage(
             @AuthenticationPrincipal Jwt jwt,
             @RequestParam("file") MultipartFile file
     ) {
@@ -48,7 +50,7 @@ public class TutorsController {
     }
 
     @DeleteMapping("/me/profile-image")
-    public TutorsResponse deleteProfileImage(@AuthenticationPrincipal Jwt jwt) {
+    public TutorResponse deleteProfileImage(@AuthenticationPrincipal Jwt jwt) {
         return tutorsService.deleteProfileImage(userId(jwt));
     }
 

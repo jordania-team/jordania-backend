@@ -1,5 +1,7 @@
 package com.jordania.api.User;
 
+import com.jordania.api.tutor.Tutor;
+import com.jordania.api.tutor.TutorRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,7 +25,7 @@ class UserServiceTest {
     private UsersRepository usersRepository;
 
     @Mock
-    private TutorsRepository tutorsRepository;
+    private TutorRepository tutorsRepository;
 
     @InjectMocks
     private UserService userService;
@@ -32,7 +34,7 @@ class UserServiceTest {
     void getMeReturnsBasicSessionWithTutorNameWhenItExists() {
         UUID userId = UUID.randomUUID();
         Users user = user(userId);
-        Tutors tutor = new Tutors(
+        Tutor tutor = new Tutor(
                 user,
                 "Tutor Name",
                 "tutor.name",

@@ -6,14 +6,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
+import com.jordania.api.tutor.*;
 
 @Service
 public class UserService {
 
     private final UsersRepository usersRepository;
-    private final TutorsRepository tutorsRepository;
+    private final TutorRepository tutorsRepository;
 
-    public UserService(UsersRepository usersRepository, TutorsRepository tutorsRepository) {
+    public UserService(UsersRepository usersRepository, TutorRepository tutorsRepository) {
         this.usersRepository = usersRepository;
         this.tutorsRepository = tutorsRepository;
     }
@@ -23,7 +24,7 @@ public class UserService {
         Users user = usersRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"));
         String name = tutorsRepository.findByUserId(userId)
-                .map(Tutors::getName)
+                .map(Tutor::getName)
                 .orElse(null);
         return UserResponse.from(user, name);
     }

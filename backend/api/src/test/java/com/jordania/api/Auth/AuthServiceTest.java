@@ -3,10 +3,10 @@ package com.jordania.api.Auth;
 import com.jordania.api.User.Providers;
 import com.jordania.api.User.ProvidersRepository;
 import com.jordania.api.User.RoleType;
-import com.jordania.api.User.Tutors;
-import com.jordania.api.User.TutorsRepository;
 import com.jordania.api.User.Users;
 import com.jordania.api.User.UsersRepository;
+import com.jordania.api.tutor.Tutor;
+import com.jordania.api.tutor.TutorRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -41,7 +41,7 @@ class AuthServiceTest {
     private UsersRepository usersRepository;
 
     @Mock
-    private TutorsRepository tutorsRepository;
+    private TutorRepository tutorsRepository;
 
     @Mock
     private InternalTokenService internalTokenService;
@@ -105,7 +105,7 @@ class AuthServiceTest {
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().minusDays(1)
         );
-        Tutors tutors = new Tutors(
+        Tutor tutors = new Tutor(
                 existingUser,
                 "Tutor Name",
                 "tutor.name",
@@ -152,7 +152,7 @@ class AuthServiceTest {
                 LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().minusDays(1)
         );
-        Tutors tutors = new Tutors(
+        Tutor tutors = new Tutor(
                 user,
                 "Tutor Name",
                 "tutor.name",

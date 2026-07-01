@@ -2,7 +2,7 @@ package com.jordania.api.Auth;
 
 import com.jordania.api.User.Providers;
 import com.jordania.api.User.ProvidersRepository;
-import com.jordania.api.User.TutorsRepository;
+import com.jordania.api.tutor.TutorRepository;
 import com.jordania.api.User.Users;
 import com.jordania.api.User.UsersRepository;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ public class AuthService {
     private final SocialTokenVerifier tokenVerifier;
     private final ProvidersRepository providersRepository;
     private final UsersRepository usersRepository;
-    private final TutorsRepository tutorsRepository;
+    private final TutorRepository tutorsRepository;
     private final InternalTokenService internalTokenService;
     private final RefreshTokenService refreshTokenService;
 
@@ -25,7 +25,7 @@ public class AuthService {
             SocialTokenVerifier tokenVerifier,
             ProvidersRepository providersRepository,
             UsersRepository usersRepository,
-            TutorsRepository tutorsRepository,
+            TutorRepository tutorsRepository,
             InternalTokenService internalTokenService,
             RefreshTokenService refreshTokenService
     ) {

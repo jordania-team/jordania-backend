@@ -1,4 +1,4 @@
-package com.jordania.api.Tutors;
+package com.jordania.api.tutor.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
-public record TutorsRequest(
+public record TutorRequest(
         @NotBlank
         String name,
 

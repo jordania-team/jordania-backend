@@ -6,8 +6,7 @@ CREATE TABLE guardianships (
     tutor_id UUID NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (pet_id) REFERENCES pets(id),
-    FOREIGN KEY (tutor_id) REFERENCES tutors(id)
+    FOREIGN KEY (tutor_id) REFERENCES tutors(id),
 
     CONSTRAINT check_not_duplicate CHECK (tutor_id <> pet_id)
 );
-

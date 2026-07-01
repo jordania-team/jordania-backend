@@ -18,8 +18,6 @@ spring:
   flyway:
     enabled: true
 
-<<<<<<< HEAD
-=======
   servlet:
     multipart:
       max-file-size: ${POCAPI_IMAGES_MAX_FILE_SIZE:5MB}
@@ -28,14 +26,10 @@ spring:
 server:
   port: ${SERVER_PORT:8080}
 
->>>>>>> rodrigo+ferrari
 management:
   endpoints:
     web:
       exposure:
-<<<<<<< HEAD
-        include: health,info
-=======
         include: health,info
 
 app:
@@ -53,4 +47,3 @@ app:
       presigned-url-ttl: ${POCAPI_IMAGES_PRESIGNED_URL_TTL:PT15M}
       public-base-url: ${POCAPI_IMAGES_PUBLIC_BASE_URL:}
       max-size-bytes: ${POCAPI_IMAGES_MAX_SIZE_BYTES:5242880}
->>>>>>> rodrigo+ferrari

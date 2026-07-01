@@ -27,7 +27,7 @@ enum FollowStatus {
 }
 
 @Entity
-@Table(name = "Followings")
+@Table(name = "followings")
 @Getter
 @Setter
 @AllArgsConstructor

@@ -1,4 +1,4 @@
-package com.jordania.api.Tutors;
+package com.jordania.api.tutor;
 
 import com.jordania.api.Auth.AuthController;
 import com.jordania.api.Auth.AuthService;
@@ -11,6 +11,8 @@ import com.jordania.api.User.UserController;
 import com.jordania.api.User.UserResponse;
 import com.jordania.api.User.UserService;
 import com.jordania.api.User.Users;
+import com.jordania.api.tutor.dto.TutorRequest;
+import com.jordania.api.tutor.dto.TutorResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -48,7 +50,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest({TutorsController.class, AuthController.class, UserController.class})
+@WebMvcTest({TutorController.class, AuthController.class, UserController.class})
 @Import(SecurityConfig.class)
 @TestPropertySource(properties = {
         "app.auth.jwt-secret=test-secret-with-at-least-thirty-two-bytes",
@@ -65,7 +67,7 @@ class TutorsControllerSecurityTest {
     private JwtEncoder jwtEncoder;
 
     @MockitoBean
-    private TutorsService tutorsService;
+    private TutorService tutorsService;
 
     @MockitoBean
     private AuthService authService;
@@ -163,7 +165,7 @@ class TutorsControllerSecurityTest {
     @Test
     void putCreatesOrUpdatesTutorWithValidToken() throws Exception {
         UUID userId = UUID.randomUUID();
-        when(tutorsService.saveMe(eq(userId), any(TutorsRequest.class))).thenReturn(tutorResponse(userId));
+        when(tutorsService.saveMe(eq(userId), any(TutorRequest.class))).thenReturn(tutorResponse(userId));
 
         String body = """
                 {
@@ -354,8 +356,8 @@ class TutorsControllerSecurityTest {
         );
     }
 
-    private TutorsResponse tutorResponse(UUID userId) {
-        return new TutorsResponse(
+    private TutorResponse tutorResponse(UUID userId) {
+        return new TutorResponse(
                 UUID.randomUUID(),
                 userId,
                 "Taylor",

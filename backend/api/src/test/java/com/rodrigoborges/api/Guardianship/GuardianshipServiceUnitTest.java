@@ -2,7 +2,11 @@ package com.rodrigoborges.api.Guardianship;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.time.LocalDateTime;
 
+import com.jordania.api.User.Providers;
+import com.jordania.api.User.RoleType;
+import com.jordania.api.User.Users;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,13 +18,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 
-import com.jordania.api.Guardianship.Guardianship;
-import com.jordania.api.Guardianship.GuardianshipRepository;
-import com.jordania.api.Guardianship.GuardianshipService;
-import com.jordania.api.Pet.Pet;
-import com.jordania.api.Pet.PetRepository;
-import com.jordania.api.Tutor.Tutor;
-import com.jordania.api.Tutor.TutorRepository;
+import com.jordania.api.guardianship.Guardianship;
+import com.jordania.api.guardianship.GuardianshipRepository;
+import com.jordania.api.guardianship.GuardianshipService;
+import com.jordania.api.pet.Pet;
+import com.jordania.api.pet.PetRepository;
+import com.jordania.api.tutor.Tutor;
+import com.jordania.api.tutor.TutorRepository;
 
 public class GuardianshipServiceUnitTest {
 
@@ -44,12 +48,16 @@ public class GuardianshipServiceUnitTest {
     @Test
     public void mustCreateGuardianshipSuccessfully() {
         // Arrange (Configuração do cenário)
-        Tutor tutor = new Tutor();
+        Tutor tutor = tutor();
         Pet pet = new Pet();
         
         // Mockando o comportamento do save para retornar a própria entidade enviada
         when(guardianshipRepository.save(any(Guardianship.class)))
-            .thenAnswer(invocation -> invocation.getArgument(0));
+            .thenAnswer(invocation -> {
+                Guardianship guardianship = invocation.getArgument(0);
+                guardianship.setId(UUID.randomUUID());
+                return guardianship;
+            });
 
         // Act (Execução do método sob teste)
         Guardianship createdGuardianship = guardianshipService.createGuardianship(tutor, pet);
@@ -99,5 +107,25 @@ public class GuardianshipServiceUnitTest {
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals(mockGuardianship.getId(), result.get().getId());
         verify(guardianshipRepository, times(1)).findByPetId(petId);
+    }
+
+    private Tutor tutor() {
+        UUID userId = UUID.randomUUID();
+        Users user = new Users(
+                userId,
+                RoleType.tutor,
+                new Providers("provider-" + userId, "google"),
+                "user@example.com",
+                LocalDateTime.now().minusDays(1),
+                LocalDateTime.now().minusDays(1)
+        );
+        return new Tutor(
+                user,
+                "Tutor Name",
+                "tutor.name",
+                false,
+                null,
+                LocalDateTime.now().minusYears(20)
+        );
     }
 }
